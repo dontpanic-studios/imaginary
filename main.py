@@ -1,8 +1,13 @@
-from PyQt6.QtWidgets import QWidget, QApplication, QLabel, QPushButton, QMessageBox
-from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtWidgets import QWidget, QApplication, QLabel, QMessageBox, QListView
+from PyQt6.QtGui import QIcon, QMouseEvent, QPixmap, QStandardItem, QStandardItemModel, QShortcut, QKeySequence
 from PyQt6 import QtCore
-from PyQt6.QtCore import pyqtSlot
-import os, logging, sys, subprocess
+from PyQt6.QtCore import Qt
+from functools import partial
+import os, logging, sys, subprocess, time
+from src.downloader.downloader import Downloader
+from src.metadata import metadata
+from src.discord import intergration
+from src.createvm import gui
 
 log = logging
 logFilePath = './log/debug-log.log'
@@ -27,6 +32,7 @@ except FileNotFoundError:
 
 class Main(QWidget):
     def __init__(self):
+        Downloader.whyNotQemu()
         log.info('trying initallizing main frame..')
         try:
             super().__init__()
@@ -42,6 +48,8 @@ class Main(QWidget):
             self.setGeometry(self.top, self.left, self.width, self.height)
             self.setWindowFlags(QtCore.Qt.WindowType.WindowCloseButtonHint | QtCore.Qt.WindowType.WindowMinimizeButtonHint)
             self.setupWidget()
+            #intergration.runcallback()
+        
             log.info('initallized.')
         except:
             exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -58,11 +66,21 @@ class Main(QWidget):
         self.label_Vm_Desc = QLabel("Why don't you make one?", self)
 
         # image
-        self.vm_background.setPixmap(QPixmap('./src/png/background/bg1.png'))
+        self.vm_background.setPixmap(QPixmap('./src/png/background/bg1.png'))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
 
         # button
-        self.createVM = QPushButton("Create VM", self)
-        self.createVM.clicked.connect(self.showCreateVMWindow)
+        self.createVM = QLabel("Create VM", self)
+        self.imaginarySetting = QLabel("Setting", self)
+
+        self.vmListView = QListView(self)
+        self.model = QStandardItemModel()
+        self.sub_folders = [name for name in os.listdir('./src/vm/') if os.path.isdir(os.path.join('./src/vm/', name))]
+
+        for i in self.sub_folders:
+            self.model.appendRow(QStandardItem(i))
+            self.vmListView.setModel(self.model)   
+            self.label_Vm_Title.setText('Select VM to get Started!')
+            self.label_Vm_Desc.setText('and Press Start VM')
 
         # font
         font_bold = self.label_Title.font()
@@ -75,54 +93,45 @@ class Main(QWidget):
         font_bold_title.setPointSize(30)
         font_bold_title.setFamily('Figtree')
 
+        font_button = self.label_Title.font()
+        font_button.setBold(True)
+        font_button.setPointSize(15)
+        font_button.setFamily('Figtree')
+
         self.label_Title.setFont(font_bold)
         self.label_Title.setStyleSheet("Color : white; background-color:#262626;")
         self.label_Vm_Title.setFont(font_bold_title)
         self.label_Vm_Title.setStyleSheet("Color : white; background-color:#2C2C2C;")
         self.label_Vm_Desc.setFont(font_bold)
         self.label_Vm_Desc.setStyleSheet("Color : white; background-color:#2C2C2C;")
+        self.createVM.setFont(font_button)
+        self.createVM.setStyleSheet("Color : white; background-color:#262626;")
+        self.imaginarySetting.setFont(font_button)
+        self.imaginarySetting.setStyleSheet("Color : white; background-color:#262626;")
+        self.vmListView.setStyleSheet("Color : white;")
+        self.vmListView.setFont(font_button)
 
         # widget move
         self.label_Title.move(15, 13)
         self.label_Vm_Title.move(350, 75)
         self.vm_background.move(320, 50)
         self.label_Vm_Desc.move(352, 120)
-        self.createVM.move(320, 15)
+        self.createVM.move(330, 15)
+        self.imaginarySetting.move(450, 15)
+        self.vmListView.move(15, 60)
 
-    def openVmFolder(self):
-        print('opening!')
+        self.vmListView.resize(290, 645)
 
     def runQemu(self, iso_loc, disk_loc, mem_size, sys_core):
         subprocess.run(f'./src/qemu/qemu.exe -enable-kvm -m {mem_size} -smp {sys_core} -cdrom {iso_loc} -hda {disk_loc} -vga qxl -device AC97 -netdev user,id=net0,net=192.168.0.0,dhcpstart=192.168.0.9')        
 
     def showCreateVMWindow(self):
         log.info("Opening CreateVM...")
-        self.w = CreateVM()
+        self.w = gui.CreateVM()
         self.w.show()
 
-class CreateVM(QWidget):
-    def __init__(self):
-        log.info('trying initallizing main frame..')
-        try:
-            super().__init__()
-
-            self.top = 200
-            self.left = 500
-            self.width = 640
-            self.height = 480
-
-            self.setWindowTitle("Create VM")
-            self.setStyleSheet("background-color: #262626;") 
-            self.setWindowIcon(QIcon('./src/png/icons/128.png'))
-            self.setGeometry(self.top, self.left, self.width, self.height)
-            self.setWindowFlags(QtCore.Qt.WindowType.WindowCloseButtonHint | QtCore.Qt.WindowType.WindowMinimizeButtonHint)
-            log.info('initallized.')
-        except:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            log.critical(f"ERROR Occurred!\nLog: {exc_type}, {exc_obj}, {exc_tb}, {fname}")
-            errInfoWinInit = QMessageBox.critical(self, '오류가 발생하였습니다.', '재설정을 하는 중에 오류가 발생했습니다.\n보통 프로그램이 꼬였거나, 저장된 위치에 한글이 들어있으면 안되는 경우가 있습니다.')
-            log.critical('failed to intiallized window')
+    def mousePressEvent(self, e):
+        self.showCreateVMWindow()      
 
 if __name__ == '__main__':
     app = QApplication(sys.argv[0:])
