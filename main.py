@@ -1,13 +1,11 @@
-from PyQt6.QtWidgets import QWidget, QApplication, QLabel, QMessageBox, QListView
-from PyQt6.QtGui import QIcon, QMouseEvent, QPixmap, QStandardItem, QStandardItemModel, QShortcut, QKeySequence
+from PyQt6.QtWidgets import QWidget, QApplication, QLabel, QMessageBox, QListView, QAbstractItemView
+from PyQt6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
 from PyQt6 import QtCore
 from PyQt6.QtCore import Qt
 from functools import partial
-import os, logging, sys, subprocess, time
+import os, logging, sys, subprocess, json
 from src.downloader.downloader import Downloader
-from src.metadata import metadata
-from src.discord import intergration
-from src.createvm import gui
+from src.gui.createvm import gui
 
 log = logging
 logFilePath = './log/debug-log.log'
@@ -48,7 +46,6 @@ class Main(QWidget):
             self.setGeometry(self.top, self.left, self.width, self.height)
             self.setWindowFlags(QtCore.Qt.WindowType.WindowCloseButtonHint | QtCore.Qt.WindowType.WindowMinimizeButtonHint)
             self.setupWidget()
-            #intergration.runcallback()
         
             log.info('initallized.')
         except:
@@ -78,9 +75,10 @@ class Main(QWidget):
 
         for i in self.sub_folders:
             self.model.appendRow(QStandardItem(i))
-            self.vmListView.setModel(self.model)   
-            self.label_Vm_Title.setText('Select VM to get Started!')
-            self.label_Vm_Desc.setText('and Press Start VM')
+            self.vmListView.setModel(self.model)
+            if len(self.sub_folders) > 0:
+                self.label_Vm_Title.setText('Select VM to get Started!')
+                self.label_Vm_Desc.setText('or create another one')
 
         # font
         font_bold = self.label_Title.font()
@@ -121,6 +119,7 @@ class Main(QWidget):
         self.vmListView.move(15, 60)
 
         self.vmListView.resize(290, 645)
+        self.vmListView.clicked[QtCore.QModelIndex].connect(self.on_clicked)
 
     def runQemu(self, iso_loc, disk_loc, mem_size, sys_core):
         subprocess.run(f'./src/qemu/qemu.exe -enable-kvm -m {mem_size} -smp {sys_core} -cdrom {iso_loc} -hda {disk_loc} -vga qxl -device AC97 -netdev user,id=net0,net=192.168.0.0,dhcpstart=192.168.0.9')        
@@ -130,8 +129,20 @@ class Main(QWidget):
         self.w = gui.CreateVM()
         self.w.show()
 
-    def mousePressEvent(self, e):
-        self.showCreateVMWindow()      
+    def on_clicked(self, index):
+        log.info('retriving info')
+        try:
+            item = self.model.itemFromIndex(index)
+            f = open('./src/vm/' + item.text() + '/metadata.json', 'r+')
+            data = json.load(f)
+
+            for i in data['desc']:
+                self.label_Vm_Desc.setText(i)
+            f.close()    
+
+            self.label_Vm_Title.setText(item.text())
+        except:
+            log.critical('failed to read metadata, is file even?')    
 
 if __name__ == '__main__':
     app = QApplication(sys.argv[0:])
