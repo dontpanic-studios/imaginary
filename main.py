@@ -1,11 +1,11 @@
 from PyQt6.QtWidgets import QWidget, QApplication, QLabel, QMessageBox, QListView, QAbstractItemView
 from PyQt6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
 from PyQt6 import QtCore
-from PyQt6.QtCore import Qt
-from functools import partial
-import os, logging, sys, subprocess, json
+import os, logging, sys, json
 from src.downloader.downloader import Downloader
 from src.gui.createvm import gui
+from src.gui.label import whynotclick
+from src.discord.intergration import Presence
 
 log = logging
 logFilePath = './log/debug-log.log'
@@ -43,12 +43,12 @@ class Main(QWidget):
             self.setWindowTitle("Imaginary")
             self.setStyleSheet("background-color: #262626;") 
             self.setWindowIcon(QIcon('./src/png/icons/128.png'))
-            self.setGeometry(self.top, self.left, self.width, self.height)
+            self.setFixedSize(self.width, self.height)
             self.setWindowFlags(QtCore.Qt.WindowType.WindowCloseButtonHint | QtCore.Qt.WindowType.WindowMinimizeButtonHint)
             self.setupWidget()
         
             log.info('initallized.')
-        except:
+        except Exception:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
             log.critical(f"ERROR Occurred!\nLog: {exc_type}, {exc_obj}, {exc_tb}, {fname}")
@@ -66,7 +66,8 @@ class Main(QWidget):
         self.vm_background.setPixmap(QPixmap('./src/png/background/bg1.png'))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
 
         # button
-        self.createVM = QLabel("Create VM", self)
+        self.createVM = whynotclick.Label(self)
+        self.createVM.setText('Create VM')
         self.imaginarySetting = QLabel("Setting", self)
 
         self.vmListView = QListView(self)
@@ -120,9 +121,9 @@ class Main(QWidget):
 
         self.vmListView.resize(290, 645)
         self.vmListView.clicked[QtCore.QModelIndex].connect(self.on_clicked)
-
-    def runQemu(self, iso_loc, disk_loc, mem_size, sys_core):
-        subprocess.run(f'./src/qemu/qemu.exe -enable-kvm -m {mem_size} -smp {sys_core} -cdrom {iso_loc} -hda {disk_loc} -vga qxl -device AC97 -netdev user,id=net0,net=192.168.0.0,dhcpstart=192.168.0.9')        
+        self.vmListView.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        
+        self.createVM.clicked.connect(self.showCreateVMWindow)
 
     def showCreateVMWindow(self):
         log.info("Opening CreateVM...")
@@ -137,12 +138,23 @@ class Main(QWidget):
             data = json.load(f)
 
             for i in data['desc']:
-                self.label_Vm_Desc.setText(i)
+                self.label_Vm_Desc.setText(data['desc'])
             f.close()    
 
+            self.label_Vm_Desc.adjustSize()
+
             self.label_Vm_Title.setText(item.text())
-        except:
+            self.label_Vm_Title.adjustSize()
+        except FileNotFoundError:
             log.critical('failed to read metadata, is file even?')    
+
+    def closeEvent(self, event):
+        message = QMessageBox.question(self, "Confirm Exit", "Are you sure you want to quit?")
+        if message == QMessageBox.StandardButton.Yes:
+            event.accept()
+            exit()
+        else:
+            event.ignore()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv[0:])
@@ -150,3 +162,4 @@ if __name__ == '__main__':
     win.setupWidget()
     win.show()
     app.exec()
+    Presence.connect()

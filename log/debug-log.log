@@ -1,4 +1,4 @@
-[2024-04-07 13:48:11,407] INFO:trying initallizing main frame..
-[2024-04-07 13:48:11,499] INFO:initallized.
-[2024-04-07 13:48:12,442] INFO:retriving info
-[2024-04-07 13:48:12,900] INFO:retriving info
+[2024-04-09 19:22:44,316] DEBUG:Using proactor: IocpProactor
+[2024-04-09 19:22:44,318] DEBUG:Using proactor: IocpProactor
+[2024-04-09 19:22:44,647] INFO:trying initallizing main frame..
+[2024-04-09 19:22:44,746] INFO:initallized.
