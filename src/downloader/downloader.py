@@ -6,10 +6,10 @@ class Downloader():
         super().__init__()
 
     def whyNotQemu():
-        if not path.isfile('./src/qemu/qemu-system-x86_64.exe'):
+        if not path.isfile('src/qemu/qemu-system-x86_64.exe'):
             print('qemu does not exist, requesting.')
 
-            with open("./src/qemu/temp/qemu64.exe", "wb") as f:
+            with open("src/qemu/temp/qemu64.exe", "wb") as f:
                 print("Downloading %s" % "qemu64.exe")
                 response = requests.get("https://qemu.weilnetz.de/w64/2024/qemu-w64-setup-20240403.exe", stream=True)
                 total_length = response.headers.get('content-length')

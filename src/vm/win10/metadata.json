@@ -1,0 +1,1 @@
+{"metadata_ver": "v0.3", "vm_name": "win10", "desc": "win10", "iso_loc": "C:/Users/sdbb2/Downloads/Win10_22H2_Korean_x64v1.iso", "max_core": 4, "max_mem": "4G", "disk_size": "64G", "disk_loc": ".\\src\\vm\\win10\\win10.img", "project": ".\\src\\vm\\win10", "snapshot": ".\\src\\vm\\win10\\snapshot.png"}

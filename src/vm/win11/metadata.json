@@ -1,1 +1,1 @@
-{"vm_name": "win11", "desc": "asdf", "iso_loc": "Select ISO Location..", "max_core": 1, "max_mem": 1, "disk_loc": ".\\src\\vm\\win11.qcow2", "project": ".\\src\\vm\\win11"}
+{"metadata_ver": "v0.3", "vm_name": "win11", "desc": "sup", "iso_loc": "C:/Users/sdbb2/Downloads/Win10_22H2_Korean_x64v1.iso", "max_core": 1, "max_mem": "PyQt6.QtCore.QSize(84, 22)M", "disk_size": "PyQt6.QtCore.QSize(84, 22)M", "disk_loc": ".\\src\\vm\\win11\\win11.img", "project": ".\\src\\vm\\win11", "snapshot": ".\\src\\vm\\win11\\snapshot.png"}
