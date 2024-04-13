@@ -1,5 +1,4 @@
 # 🌠 imaginary
 GUI Tool for QEMU written in Python
 
-## Required pip
-pyqt6>=6.6.1
+[![pypresence](https://img.shields.io/badge/using-pypresence-00bb88.svg?style=for-the-badge&logo=discord&logoWidth=20)](https://github.com/qwertyquerty/pypresence)
