@@ -1,17 +1,18 @@
-from PyQt6.QtWidgets import QWidget, QApplication, QLabel, QMessageBox, QListView, QAbstractItemView
+from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QListView, QAbstractItemView
 from PyQt6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel, QKeySequence, QShortcut
 from PyQt6 import QtCore
-import os, logging, sys, json, subprocess, requests, psutil
+import os, logging, sys, json, subprocess, requests, psutil, traceback, pyautogui, pygetwindow
 from src.gui.createvm import createvm
 from src.gui.label import whynotclick
 from src.discord.intergration import Presence
 from src.gui.setting import info
 from src.gui.editvm import editvm
+from PIL import Image
 from dotenv import load_dotenv
 
 log = logging
 logFilePath = './log/debug-log.log'
-githubLink = requests.get('https://api.github.com/repos/sujeb2/O.C.G/releases/latest')
+githubLink = requests.get('https://api.github.com/repos/dontpanic-studios/imaginary/releases/latest')
 print('Load ENV')
 log.info('Load ENV')
 try:
@@ -104,7 +105,6 @@ class Main(QWidget):
         self.sub_folders = [name for name in os.listdir('src/vm/') if os.path.isdir(os.path.join('src/vm/', name))]
 
         for i in self.sub_folders:
-            print('Trying to find VM(s)')
             self.model.appendRow(QStandardItem(i))
             self.vmListView.setModel(self.model)
             if len(self.sub_folders) > 0:
@@ -188,7 +188,7 @@ class Main(QWidget):
                     self.label_Vm_Desc.setText(data['desc'])
                 f.close()
 
-                self.label_VMInfo.setText(f'Metadata Ver  |  {data['metadata_ver']}\nMax Core  |  {data['max_core']}\nMax Ram  |  {data['max_mem']}\nDisk Size  |  {data['disk_size']}')
+                self.label_VMInfo.setText(f'Metadata Ver  |  {data['metadata_ver']}\nMax Core  |  {data['max_core']}\nMax Ram  |  {data['max_mem']}\nDisk Size  |  {data['disk_size']}\nIs Experimental On  |  {data['isaccel']['bool']}')
             except:
                 log.critical('Failed to load VM metadata!, is file even?')
                 self.label_VMInfo.setText('No Metadata has been found.')
@@ -260,13 +260,32 @@ class Main(QWidget):
     def runQemu(self):
         f = open('./src/vm/' + self.label_Vm_Title.text() + '/metadata.json', 'r+')
         data = json.load(f)
-        qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -qmp unix:qmp.sock,server=on,wait=off -display gtk,show-menubar=off -hda {data['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -vga qxl"], stdout=subprocess.PIPE)
-        self.stopVM.clicked.connect(qemu.terminate)
-        proc = psutil.Process(qemu.pid)
-        if(proc.status == psutil.STATUS_RUNNING):
-            self.label_Vm_Status.setText('Status: Running through some kind of resistance.')
-            self.label_Vm_Status.setStyleSheet('Color : #42f566; background-color: #2C2C2C;')
-        self.label_Vm_Status.adjustSize() 
+        try:
+            if(data['isaccel']['bool'] == False):
+                if(data['vga']['type'] == 'isa-vga'):
+                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -hda {data['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']},vgamem_mb={data['vga']['mem']} {data['addition']['args']}"], stdout=subprocess.PIPE)
+                else:
+                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -hda {data['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} {data['addition']['args']}"], stdout=subprocess.PIPE)
+            else:
+                qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -hda {data['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} -accel {data['isaccel']['acceltype']} {data['addition']['args']}"], stdout=subprocess.PIPE)
+            self.stopVM.clicked.connect(qemu.terminate)
+            proc = psutil.Process(qemu.pid)
+            if(proc.status == psutil.STATUS_RUNNING):
+                self.label_Vm_Status.setText('Status: Running through some kind of resistance.')
+                self.label_Vm_Status.setStyleSheet('Color : #42f566; background-color: #2C2C2C;')
+                self.takeSnapshot()
+            self.label_Vm_Status.adjustSize() 
+            
+        except:
+            print('QEMU Run Failed!')
+            trace = traceback.print_exc()
+            qemuRunFailed = QMessageBox(self)
+            qemuRunFailed.setIcon(QMessageBox.Icon.Critical)
+            qemuRunFailed.setWindowIcon(QIcon('src/png/icons/128.png'))
+            qemuRunFailed.setWindowTitle('QEMU 실행 실패')
+            qemuRunFailed.setText(f'QEMU 실행에 실패하였습니다.\nShow Details을 눌러 오류 사항을 확인하세요.')
+            qemuRunFailed.setDetailedText(str(trace))
+            qemuRunFailed.exec()
 
     def checkUpdate(self):
             print('Checking update')
@@ -299,6 +318,21 @@ class Main(QWidget):
                 usingDebugVer.exec()
             elif(githubLatestVer == VER):
                 log.info(f"최신버전을 사용하고 있습니다!")
+
+    def takeSnapshot(self):
+        f = open('./src/vm/' + self.label_Vm_Title.text() + '/metadata.json', 'r+')
+        data = json.load(f)
+        path = data['snapshot']
+        titles = pygetwindow.getAllTitles()
+        window = pygetwindow.getWindowsWithTitle(f'QEMU ({data['vm_name']})')[0]
+        left, top = window.topleft
+        right, bottom = window.bottomright
+
+        pyautogui.screenshot(path)
+        im = Image.open(path)
+        im.crop((left+10, top, right-10, bottom-10))
+        im.save(path)
+        im.show(path)
 
 if __name__ == '__main__':
     Presence.connect()

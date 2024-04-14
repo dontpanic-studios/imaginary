@@ -35,6 +35,7 @@ class EditVM(QWidget):
 
     def initUI(self):
         self.label_Title = QLabel('Edit VM', self)
+        self.label_VM_Name = QLabel('Dummy', self)
         self.label_createVM = whynotclick.Label(self)
         self.label_createVM.setText('Save')
 
