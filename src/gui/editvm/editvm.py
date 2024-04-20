@@ -1,23 +1,23 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QLineEdit, QFileDialog
+from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QLineEdit, QFileDialog, QTabWidget
 from PyQt6.QtGui import QIcon
 from PyQt6 import QtCore
 from src.gui.label import whynotclick
-import os, sys, logging, json, subprocess
+import os, sys, logging, json
 from dotenv import load_dotenv
-from pathlib import Path
 
 log = logging
 logFilePath = './log/debug-log.log'
 load_dotenv('./data/setting.env')
 
 class EditVM(QWidget):
-    def __init__(self):
+    def __init__(self, vmname):
         log.info('trying initallizing frame..')
         try:
             super().__init__()
 
             self.width = 640
             self.height = 480
+            self.vmname = vmname
 
             self.setWindowTitle("Edit VM")
             self.setStyleSheet("background-color: #262626;") 
@@ -39,6 +39,15 @@ class EditVM(QWidget):
         self.label_createVM = whynotclick.Label(self)
         self.label_createVM.setText('Save')
 
+        self.generalTab = QWidget()
+        self.systemTab = QWidget()
+        self.debugTab = QWidget()
+
+        self.tab_VMEdit = QTabWidget(self)
+        self.tab_VMEdit.addTab(self.generalTab, 'General')
+        self.tab_VMEdit.addTab(self.systemTab, 'System')
+        self.tab_VMEdit.addTab(self.debugTab, 'Debug')
+
         # font
         font_bold_title = self.label_Title.font()
         font_bold_title.setBold(True)
@@ -52,21 +61,33 @@ class EditVM(QWidget):
 
         font_button = self.label_Title.font()
         font_button.setBold(True)
-        font_button.setPointSize(15)
+        font_button.setPointSize(13)
         font_button.setFamily(os.environ.get('Font'))      
 
         self.label_Title.move(20, 15)
         self.label_createVM.move(550, 430)
+        self.label_VM_Name.move(20, 70)
 
         self.label_Title.setFont(font_bold_title)
         self.label_createVM.setFont(font_bold)
+        self.label_VM_Name.setFont(font_button)
+        self.tab_VMEdit.setFont(font_button)
 
         self.label_Title.setStyleSheet("Color : white;")
         self.label_createVM.setStyleSheet("Color : white;")
+        self.label_VM_Name.setStyleSheet("Color : white;")
+        self.tab_VMEdit.setStyleSheet("Color : white; background-color : #2c2c2c; selection-color : #2c2c2c; selection-background-color: #2c2c2c;")
 
         self.label_createVM.adjustSize()
         self.label_Title.adjustSize()
         self.label_createVM.clicked.connect(self.saveEdit)
 
+        self.label_VM_Name.setText(self.vmname)
+
     def saveEdit(self):
         self.close()    
+
+    def loadData(self, name):
+        f = open(f'./src/vm/{name}/metadata.json', 'r+')   
+        self.data = json.load(f)
+        print(f'Got package, header: \n{self.data}')

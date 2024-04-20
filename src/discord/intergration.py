@@ -21,15 +21,14 @@ if(os.environ.get('DiscordSupport') == 'True'):
         curState = 'Running through VM(s)'
 
         print(RPC.update(details=curState, large_image='star'))
-        app = QApplication(sys.argv[0:])
+        app = QApplication(sys.argv[0:]) # yeah i shouldn't doing this for presence but, no option!
         win = Main()
         win.setupWidget()
         win.show()
         app.exec()
         print('done')
-        start_time=time.time()
         while True:
-            RPC.update(details=curState, large_image='star', start=start_time)
+            RPC.update(details=curState, large_image='star')
     except DiscordNotFound:
         msgBox = QMessageBox()
         msgBox.setWindowTitle('디스코드 확인되지 않음')

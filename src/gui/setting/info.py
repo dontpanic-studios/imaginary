@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox
+from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QCheckBox
 from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6 import QtCore
 import os, sys, logging
@@ -34,6 +34,9 @@ class CreateVM(QWidget):
         self.label_Version = QLabel(f"{os.environ.get('Ver')}\nOpen-source QEMU GUI Tool", self)
         self.label_Logo.setPixmap(QPixmap('./src/png/icons/128.png')) 
 
+        self.enableLabSetting = QCheckBox(self)
+        self.enableLabSetting.setText('Enable Lab Settings')
+
         font_bold_title = self.label_InfoTitle.font()
         font_bold_title.setBold(True)
         font_bold_title.setPointSize(30)
@@ -44,16 +47,33 @@ class CreateVM(QWidget):
         self.font_bold.setPointSize(20)
         self.font_bold.setFamily(os.environ.get('Font'))
 
+        self.font_smol = self.label_InfoTitle.font()
+        self.font_smol.setBold(True)
+        self.font_smol.setPointSize(17)
+        self.font_smol.setFamily(os.environ.get('Font'))
+
         self.label_Logo.move(15, 15)
         self.label_Logo.resize(64, 64)
         self.label_InfoTitle.move(150, 15)
         self.label_Version.move(150, 65)
+        self.enableLabSetting.move(15, 150)
 
         self.label_InfoTitle.setFont(font_bold_title)
         self.label_InfoTitle.setStyleSheet("Color : white; background-color: #262626;")
         self.label_Version.setFont(self.font_bold)
         self.label_Version.setStyleSheet("Color : white; background-color: #262626;")
+        self.enableLabSetting.setFont(self.font_smol)
+        self.enableLabSetting.setStyleSheet("Color : white; background-color: #262626;")        
 
         self.label_Logo.adjustSize()
         self.label_InfoTitle.adjustSize()
         self.label_Version.adjustSize()
+        self.enableLabSetting.adjustSize()
+
+        if os.environ.get('isLabEnable') == 'True':
+            self.enableLabSetting.setChecked(True)
+        else:
+            self.enableLabSetting.setChecked(False)    
+
+    #def closeEvent(self, event):
+    #    os.environ.update('isLabEnable', kwargs=self.enableLabSetting.isChecked)   

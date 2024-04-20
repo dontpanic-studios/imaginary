@@ -1,50 +1,28 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QListView, QAbstractItemView
-from PyQt6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel, QKeySequence, QShortcut
+from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QListView, QAbstractItemView, QMenu
+from PyQt6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
 from PyQt6 import QtCore
-import os, logging, sys, json, subprocess, requests, psutil, traceback, pyautogui, pygetwindow
+from PyQt6.QtCore import QEvent
+import os, sys, json, subprocess, requests, psutil, traceback
 from src.gui.createvm import createvm
 from src.gui.label import whynotclick
 from src.discord.intergration import Presence
 from src.gui.setting import info
 from src.gui.editvm import editvm
-from PIL import Image
+from src.exception.QemuRunFail import *
 from dotenv import load_dotenv
 
-log = logging
-logFilePath = './log/debug-log.log'
 githubLink = requests.get('https://api.github.com/repos/dontpanic-studios/imaginary/releases/latest')
 print('Load ENV')
-log.info('Load ENV')
 try:
     load_dotenv('./data/setting.env')
     VER = os.environ.get('Ver')
 except FileNotFoundError:
     print('Setting ENV File cannot be found!')
-    log.info('Setting ENV File cannot be found!')
-
-try:
-    print("Reading..")
-    print(os.path.isfile(logFilePath))
-    print("Setting up debug log..")
-    log.basicConfig(format="[%(asctime)s] %(levelname)s:%(message)s", filename='./log/debug-log.log', level=logging.DEBUG, encoding="utf-8")
-    print("Resetting..")
-    f = open('./log/debug-log.log', 'w')
-    f.close()
-except FileNotFoundError:
-    if os.path.isfile(logFilePath) == False:
-        print("Logging file not exists, making...")
-        try:
-            f = open('./log/debug-log.log', 'w')
-            f.close()
-        except:
-            print("An error occurred while writing log file.")
-            print("It may the file exists or no permission to write file to location.")
 
 class Main(QWidget):
     def __init__(self):
-        log.info(f'Imaginary {VER}\nPyQt v{QtCore.qVersion()}')
         print(f'Imaginary {os.environ.get('Ver')}\nPyQt v{QtCore.qVersion()}')
-        log.info('trying initallizing main frame..')
+        print('trying initallizing main frame..')
         try:
             super().__init__()
             self.checkUpdate()
@@ -56,13 +34,14 @@ class Main(QWidget):
             self.setWindowFlags(QtCore.Qt.WindowType.WindowCloseButtonHint | QtCore.Qt.WindowType.WindowMinimizeButtonHint)
             self.setupWidget()
         
-            log.info('initallized.')
+            print('initallized.')
         except Exception:
             exc_type, exc_obj, exc_tb = sys.exc_info()
             fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            log.critical(f"ERROR Occurred!\nLog: {exc_type}, {exc_obj}, {exc_tb}, {fname}")
+            print(f"ERROR Occurred!\nLog: {exc_type}, {exc_obj}, {exc_tb}, {fname}")
             errInfoWinInit = QMessageBox.critical(self, '오류가 발생하였습니다.', '재설정을 하는 중에 오류가 발생했습니다.\n보통 프로그램이 꼬였거나, 저장된 위치에 한글이 들어있으면 안되는 경우가 있습니다.')
-            log.critical('failed to intiallized window')
+            print('failed to intiallized window')
+            return
 
     def setupWidget(self):
         # label
@@ -70,7 +49,7 @@ class Main(QWidget):
         self.vm_background = QLabel(self)
         self.label_Title = whynotclick.Label(self)
         self.label_Title.setText("🌠 Imaginary")
-        self.label_Vm_Title = QLabel("No VM has been found in Folder!", self)
+        self.label_Vm_Title = QLabel("No VM has been found!", self)
         self.label_Vm_Desc = QLabel("Why don't you make one?", self)
         self.label_Vm_Status = QLabel("Status: No VM status available.", self)
         self.vm_Snapshot = QLabel(self)
@@ -79,7 +58,7 @@ class Main(QWidget):
 
         # image
         self.vm_background.setPixmap(QPixmap('src/png/background/bg1.png'))        
-        self.vm_Snapshot.setPixmap(QPixmap('src/png/snapshot.png'))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+        self.vm_Snapshot.setPixmap(QPixmap('src/png/snapshot.png'))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 
         # button
         self.createVM = whynotclick.Label(self)
@@ -95,25 +74,12 @@ class Main(QWidget):
         self.editVM = whynotclick.Label(self)
         self.editVM.setText('Edit VM')
 
-        # shortcut
-        self.short_createVM = QShortcut(QKeySequence('Ctrl+C'), self)
-        self.short_createVM.activated.connect(self.showCreateVMWindow)
-
         # vm list
         self.vmListView = QListView(self)
         self.model = QStandardItemModel()
         self.sub_folders = [name for name in os.listdir('src/vm/') if os.path.isdir(os.path.join('src/vm/', name))]
-
-        for i in self.sub_folders:
-            self.model.appendRow(QStandardItem(i))
-            self.vmListView.setModel(self.model)
-            if len(self.sub_folders) > 0:
-                self.label_Vm_Title.setText('Select VM to get Started!')
-                self.label_Vm_Desc.setText('or create another one')
-            else:
-                self.label_Snapshot.hide()
-                self.vm_Snapshot.hide()
-                print(f'No VM File found, ignoring and returing default state.')    
+        self.reloadList()
+        self.vmListView.setStyleSheet("border : 2px solid black;")
 
         # font
         self.font_bold = self.label_Title.font()
@@ -158,25 +124,27 @@ class Main(QWidget):
         self.createVM.clicked.connect(self.showCreateVMWindow)
         self.setting.clicked.connect(self.showSettingWindow)
         self.label_Title.clicked.connect(self.vmListView.clearSelection)
+
+        self.vmListView.installEventFilter(self)
         self.setLabelFont()
 
     def showCreateVMWindow(self):
-        log.info("Opening CreateVM...")
+        print("Opening CreateVM...")
         self.w = createvm.CreateVM()
         self.w.show()
 
     def showSettingWindow(self):
-        log.info("Opening SettingWin...")
+        print("Opening SettingWin...")
         self.w = info.CreateVM()
         self.w.show()    
 
     def showEditWindow(self):
-        log.info("Opening EditWin...")
-        self.w = editvm.EditVM()
+        print("Opening EditWin...")
+        self.w = editvm.EditVM(self.label_Vm_Title.text())
         self.w.show()        
 
     def on_clicked(self, index):
-        log.info('Retriving Info from metadata.json')
+        print('Retriving Info from metadata.json')
         try:
             item = self.model.itemFromIndex(index)
             print('Tries to load metadata')
@@ -187,10 +155,10 @@ class Main(QWidget):
                 for i in data['desc']:
                     self.label_Vm_Desc.setText(data['desc'])
                 f.close()
-
-                self.label_VMInfo.setText(f'Metadata Ver  |  {data['metadata_ver']}\nMax Core  |  {data['max_core']}\nMax Ram  |  {data['max_mem']}\nDisk Size  |  {data['disk_size']}\nIs Experimental On  |  {data['isaccel']['bool']}')
+                self.label_VMInfo.setText(f'Metadata Ver  |  {data['metadata_ver']}\nMax Core  |  {data['max_core']}\nMax Ram  |  {data['max_mem']}\nDisk Size  |  {data['disk_size']}\nIs Experimental On  |  {data['isaccel']['bool']}\nAccelerator Type  |  {data['isaccel']['acceltype']}\nV-GPU Type  |  {data['vga']['type']}')
             except:
-                log.critical('Failed to load VM metadata!, is file even?')
+                print('Failed to load VM metadata!, is file even?')
+                print(traceback.print_exc())
                 self.label_VMInfo.setText('No Metadata has been found.')
                 self.label_VMInfo.adjustSize()    
 
@@ -198,7 +166,7 @@ class Main(QWidget):
                 print('Load snapshot')
                 self.label_Snapshot.setPixmap(QPixmap(data['snapshot']))
             except:
-                log.critical('File not found, returing default state.')
+                print('File not found, returing default state.')
                 self.label_Snapshot.setPixmap(QPixmap('src/png/snapshot.png'))    
             self.runVM.clicked.connect(self.runQemu)
             self.editVM.clicked.connect(self.showEditWindow)
@@ -210,12 +178,12 @@ class Main(QWidget):
 
             self.label_Vm_Title.setText(item.text())
             self.label_Vm_Title.adjustSize()
-            #Presence.update(self, details=f'Looking up {item.text()}', large_image='star')
+            #Presence.update(self, details=f'Looking up {item.text()}', large_image='star') # this mf doesn't work properly
         except FileNotFoundError:
-            log.critical('failed to read metadata, is file even?')    
+            print('failed to read metadata, is file even?')    
 
     def closeEvent(self, event):
-        exit(0)
+        sys.exit(0)
 
     def setLabelFont(self):
         self.label_Title.setFont(self.font_bold)
@@ -246,36 +214,47 @@ class Main(QWidget):
         self.label_VMInfo.setStyleSheet("Color : white; background:#2C2C2C;")
 
     def reloadList(self):
+        # this shit is crazy! but why not?
         self.model.clear()
         self.sub_folders = [name for name in os.listdir('src/vm/') if os.path.isdir(os.path.join('src/vm/', name))]
         for i in self.sub_folders:
-            self.model.appendRow(QStandardItem(i))
+            f = open('./src/vm/' + i + '/metadata.json', 'r+')
+            data = json.load(f)
+            print('Done')
+            it = QStandardItem(i)
+            self.model.appendRow(it)
+            it.setData(QIcon(f'src/png/{data['vm_type']}.png'.format(i)), QtCore.Qt.ItemDataRole.DecorationRole)
             self.vmListView.setModel(self.model)
+            print('Model setup done.')
             if len(self.sub_folders) > 0:
                 self.label_Vm_Title.setText('Select VM to get Started!')
                 self.label_Vm_Desc.setText('or create another one')
                 self.label_Vm_Title.adjustSize()
                 self.label_Vm_Desc.adjustSize()
+            else:
+                self.label_Snapshot.setHidden(True)
+                self.vm_Snapshot.setHidden(True)
+                print('No VM(s) has been found, ignoring it.')  
+
 # idk why this thing wont work properly
     def runQemu(self):
+        print('Load Model')
         f = open('./src/vm/' + self.label_Vm_Title.text() + '/metadata.json', 'r+')
         data = json.load(f)
         try:
             if(data['isaccel']['bool'] == False):
                 if(data['vga']['type'] == 'isa-vga'):
-                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -hda {data['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']},vgamem_mb={data['vga']['mem']} {data['addition']['args']}"], stdout=subprocess.PIPE)
+                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format=raw,file={data['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']},vgamem_mb={data['vga']['mem']} {data['addition']['args']}"], stdout=subprocess.PIPE)
                 else:
-                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -hda {data['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} {data['addition']['args']}"], stdout=subprocess.PIPE)
+                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format=raw,file={data['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} {data['addition']['args']}"], stdout=subprocess.PIPE)
             else:
-                qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -hda {data['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} -accel {data['isaccel']['acceltype']} {data['addition']['args']}"], stdout=subprocess.PIPE)
+                qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format=raw,file={data['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} -accel {data['isaccel']['acceltype']} {data['addition']['args']}"], stdout=subprocess.PIPE)
             self.stopVM.clicked.connect(qemu.terminate)
             proc = psutil.Process(qemu.pid)
             if(proc.status == psutil.STATUS_RUNNING):
                 self.label_Vm_Status.setText('Status: Running through some kind of resistance.')
                 self.label_Vm_Status.setStyleSheet('Color : #42f566; background-color: #2C2C2C;')
-                self.takeSnapshot()
             self.label_Vm_Status.adjustSize() 
-            
         except:
             print('QEMU Run Failed!')
             trace = traceback.print_exc()
@@ -284,23 +263,21 @@ class Main(QWidget):
             qemuRunFailed.setWindowIcon(QIcon('src/png/icons/128.png'))
             qemuRunFailed.setWindowTitle('QEMU 실행 실패')
             qemuRunFailed.setText(f'QEMU 실행에 실패하였습니다.\nShow Details을 눌러 오류 사항을 확인하세요.')
-            qemuRunFailed.setDetailedText(str(trace))
+            qemuRunFailed.setDetailedText(f'Imaginary(이)가 QEMU 실행이 정상적으로 진행이 안되었다고 판단되었습니다,\n{str(trace)}')
             qemuRunFailed.exec()
+            raise QemuRunVaildationFail("testing")
 
     def checkUpdate(self):
             print('Checking update')
             githubLatestVer = githubLink.json()["name"]
             githubLastestDownload = githubLink.json()['assets']
-            log.info(githubLastestDownload)
-            log.info("Current path: " + os.getcwd())
-
-            log.info(f"만약에 이 메세지가 보인다면, 현재 디버그용 .exe 를 사용하고 있습니다.")
-            log.warning("이 프로젝트를 이용해서 개발을 할려는 목적이 아니라면, 'imaginary-user.zip' 를 받아주세요.")
-            log.info("Current latest version: " + githubLatestVer)
-            log.info("Current version: " + os.environ.get('Ver'))
+            print(githubLastestDownload)
+            print("Current path: " + os.getcwd())
+            print("Current latest version: " + githubLatestVer)
+            print("Current version: " + os.environ.get('Ver'))
             if(githubLatestVer > VER):
                 print('Using old version!')
-                log.warning("You're currerntly using older version of Imaginary.")
+                print("You're currerntly using older version of Imaginary.")
                 findUpdateMsg = QMessageBox(self)
                 findUpdateMsg.setIcon(QMessageBox.Icon.Question)
                 findUpdateMsg.setWindowIcon(QIcon('src/png/icons/128.png'))
@@ -309,7 +286,7 @@ class Main(QWidget):
                 findUpdateMsg.setDetailedText(githubLink.json()['body'])
                 findUpdateMsg.exec()
             elif(githubLatestVer < VER):
-                log.warning(f"현재 개발자 버전을 사용하고 있습니다, 이 버전은 매우 불안정하며, 버그가 자주 발생합니다.")
+                print(f"현재 개발자 버전을 사용하고 있습니다, 이 버전은 매우 불안정하며, 버그가 자주 발생합니다.")
                 usingDebugVer = QMessageBox(self)
                 usingDebugVer.setIcon(QMessageBox.Icon.Warning)
                 usingDebugVer.setWindowIcon(QIcon('src/png/icons/128.png'))
@@ -317,22 +294,32 @@ class Main(QWidget):
                 usingDebugVer.setText(f'현재 {githubLatestVer} 버전보다 더 높은 버전 {VER} 을 사용하고 있습니다.\n이 버전은 매우 불안정하며, 버그가 자주 발생합니다.')
                 usingDebugVer.exec()
             elif(githubLatestVer == VER):
-                log.info(f"최신버전을 사용하고 있습니다!")
+                print(f"최신버전을 사용하고 있습니다!")
 
-    def takeSnapshot(self):
-        f = open('./src/vm/' + self.label_Vm_Title.text() + '/metadata.json', 'r+')
-        data = json.load(f)
-        path = data['snapshot']
-        titles = pygetwindow.getAllTitles()
-        window = pygetwindow.getWindowsWithTitle(f'QEMU ({data['vm_name']})')[0]
-        left, top = window.topleft
-        right, bottom = window.bottomright
+    def eventFilter(self, source, event):
+        if event.type() == QEvent.Type.ContextMenu and source is self.vmListView:
+            menu = QMenu()
+            menu.addAction('Run VM')
+            menu.addAction('Edit VM')
+            menu.addAction('Delete VM')
+            menu.addAction('Debug')
 
-        pyautogui.screenshot(path)
-        im = Image.open(path)
-        im.crop((left+10, top, right-10, bottom-10))
-        im.save(path)
-        im.show(path)
+            if menu.exec(event.globalPos()):
+                item = source.itemAt(event.pos())
+                print(item.text())
+            return True
+        
+        return super().eventFilter(source, event)
+
+    def confirmDeleteVM(self, index):
+        item = self.model.itemFromIndex(index)
+        isTrue = QMessageBox.warning(self, '정말로 지울까요?', f'가상머신 {item.text()} (을)를 지울까요?\n다시는 변경하지 않아요!', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        response = isTrue.exec()
+
+        if(response == QMessageBox.Yes):
+            print('watt')
+        else:
+            print('ignoring.')
 
 if __name__ == '__main__':
     Presence.connect()

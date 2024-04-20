@@ -18,7 +18,7 @@ class CreateVM(QWidget):
             self.width = 640
             self.height = 480
 
-            self.setWindowTitle("Create VM")
+            self.setWindowTitle("VM Setup Wizard")
             self.setStyleSheet("background-color: #262626; Color : white;") 
             self.setWindowIcon(QIcon('src/png/icons/128.png'))
             self.setFixedSize(self.width, self.height)
@@ -33,8 +33,9 @@ class CreateVM(QWidget):
             log.critical('failed to intiallized window')
 
     def initUI(self):
-        self.experimental_GPUType_List = ['qxl', 'virtio-gpu', 'isa-vga']
-        self.label_Title = QLabel('Create QEMU VM', self)
+        self.experimental_GPUType_List = ['virtio-gpu', 'qxl', 'isa-vga']
+        self.diskType_List = ['RAW', 'qcow2', 'vhdx']
+        self.label_Title = QLabel('Setup your VM', self)
         self.label_InputLabel = QLabel('VM Name', self)
         self.label_InputLabel_disk = QLabel('Disk Size', self)
         self.label_InputLabel_desc = QLabel('VM Description', self)
@@ -53,9 +54,10 @@ class CreateVM(QWidget):
         self.Input_DiskSize = QLineEdit(self)
         self.Input_RamSize = QLineEdit(self)
         self.Input_VGAMemSize = QLineEdit(self)        
+        self.experimental_Input_StartupArg = QLineEdit(self)
 
         self.experimental_HAX_Accel = QCheckBox(self)
-        self.experimental_HAX_Accel.setText('EXPERIMENTAL : Enable HAXM')
+        self.experimental_HAX_Accel.setText('Lab: Enable TCG (Tiny Code Generator)')
         #self.experimental_OpenGL_Accel = QCheckBox(self)
         #self.experimental_OpenGL_Accel.setText('EXPERIMENTAL : Enable OpenGL (Linux Only)') 
         self.experimental_GPUType = QComboBox(self)
@@ -77,22 +79,23 @@ class CreateVM(QWidget):
         font_button.setFamily(os.environ.get('Font'))      
 
         self.label_Title.move(20, 15)
-        self.label_InputLabel.move(20, 100)
+        self.label_InputLabel.move(20, 80)
         self.label_createVM.move(550, 430)
-        self.Input_VMName.move(20, 130)
-        self.label_InputLabel_desc.move(300, 100)
-        self.Input_VMDesc.move(300, 127)
-        self.label_loadISO_title.move(20, 170)
-        self.label_loadISO.move(19, 195)
-        self.label_InputLabel_disk.move(300, 240)
-        self.Input_DiskSize.move(300, 270)
-        self.Input_RamSize.move(20, 270)
-        self.label_RamSize.move(20, 240)
-        self.experimental_HAX_Accel.move(20, 380)
-        self.experimental_GPUType.move(20, 340)
-        self.label_GPUType.move(20, 310)
-        self.Input_VGAMemSize.move(300, 340)
-        self.label_VGAMemSize.move(300, 310)
+        self.Input_VMName.move(20, 110)
+        self.label_InputLabel_desc.move(300, 80)
+        self.Input_VMDesc.move(300, 110)
+        self.label_loadISO_title.move(20, 145)
+        self.label_loadISO.move(19, 170)
+        self.label_InputLabel_disk.move(300, 210)
+        self.Input_DiskSize.move(300, 240)
+        self.Input_RamSize.move(20, 240)
+        self.label_RamSize.move(20, 210)
+        self.experimental_HAX_Accel.move(20, 355)
+        self.experimental_GPUType.move(20, 315)
+        self.label_GPUType.move(20, 285)
+        self.Input_VGAMemSize.move(300, 315)
+        self.label_VGAMemSize.move(300, 285)
+        self.experimental_Input_StartupArg.move(20, 395)
 
         self.label_Title.setFont(font_bold_title)
         self.Input_VMName.setFont(font_button)
@@ -111,6 +114,7 @@ class CreateVM(QWidget):
         self.label_VGAMemSize.setFont(font_button)
         self.experimental_GPUType.setFont(font_button)
         self.label_GPUType.setFont(font_button)
+        self.experimental_Input_StartupArg.setFont(font_button)
 
         self.label_Title.setStyleSheet("Color : white;")
         self.Input_VMName.setStyleSheet("Color : white;")
@@ -119,7 +123,7 @@ class CreateVM(QWidget):
         self.Input_VMDesc.setStyleSheet("Color : white;")
         self.label_loadISO.setStyleSheet("Color : white;")
         self.label_InputLabel.setStyleSheet("Color : white;")
-        self.label_loadISO.setStyleSheet("Color : white;")
+        self.label_loadISO.setStyleSheet("Color : #4aa4ff;")
         self.label_loadISO_title.setStyleSheet("Color : white;")
         self.label_InputLabel_disk.setStyleSheet("Color : white;")
         self.Input_DiskSize.setStyleSheet("Color : white;")
@@ -130,6 +134,7 @@ class CreateVM(QWidget):
         self.label_VGAMemSize.setStyleSheet("Color : white;")
         self.experimental_GPUType.setStyleSheet("Color : white;")
         self.label_GPUType.setStyleSheet("Color : white;")
+        self.experimental_Input_StartupArg.setStyleSheet("Color : white;")
 
         self.label_createVM.adjustSize()
         self.label_InputLabel.adjustSize()
@@ -149,12 +154,14 @@ class CreateVM(QWidget):
         self.label_VGAMemSize.adjustSize()
         self.experimental_GPUType.adjustSize()
         self.label_GPUType.adjustSize()
+        self.experimental_Input_StartupArg.adjustSize()
 
         self.Input_VMName.setPlaceholderText('eg) Windows 11')
         self.Input_VMDesc.setPlaceholderText('eg) Description Text')
         self.Input_DiskSize.setPlaceholderText('eg) 64G')
         self.Input_RamSize.setPlaceholderText('eg) 4G')
         self.Input_VGAMemSize.setPlaceholderText('1 ~ 256')
+        self.experimental_Input_StartupArg.setPlaceholderText('Startup Arguments')
 
         self.label_createVM.clicked.connect(self.saveChange)
         self.label_loadISO.clicked.connect(self.loadISO)
@@ -165,6 +172,7 @@ class CreateVM(QWidget):
         metadata = {
             'metadata_ver': os.environ.get('Ver'),
             'vm_name': self.Input_VMName.text(),
+            'vm_type': 'unknown',
             'desc': self.Input_VMDesc.text(),
             'iso_loc': self.label_loadISO.text(),
             'max_core': 2,
@@ -182,13 +190,18 @@ class CreateVM(QWidget):
                 'type': self.experimental_GPUType.currentText()
             },
             'addition': {
-                'args': ''
+                'args': self.experimental_Input_StartupArg.text()
             }
         }
         print(f'vm setting: \n{metadata}')
 
         if metadata['isaccel']['bool'] == True:
-            msg = QMessageBox.warning(self, '실험적 기능 켜짐', '경고!\n\n실험적 기능인 하드웨어 가상화가 켜져있습니다.\n이 기능은 오직 Intel(Windows) 에서만 작동하며,\nHAXM이 설치된 상태에서 실행이 되어야합니다.')
+            msg = QMessageBox.warning(self, '실험적 기능 켜짐', '경고!\n\n하드웨어 가상화가 켜져있습니다!\n해당 기능은 특정 기기에서 작동이 안될수 있습니다!')
+        if metadata['vga']['type'] == 'qxl' or metadata['vga']['type'] == 'isa-vga':
+            msg = QMessageBox.warning(self, '저속 그래픽 사용', 'virtio-gpu 그래픽과 달리 저속 그래픽 세팅을 사용하고 있습니다!\n가상머신의 성능 저하가 있을수 있습니다.')
+        if metadata['vga']['type'] == 'virtio-gpu' and metadata['vga']['mem'] != '':
+            msg = QMessageBox.critical(self, '그래픽 메모리 지원 안됨', '선택한 그래픽 세팅은 메모리 변경이 불가능한 세팅입니다,\n"qxl" 또는 "isa-vga" 로 바꿔주세요.')    
+            return
         if not os.path.exists(f'src/vm/{metadata['vm_name']}'):
             os.mkdir(f'.\\src\\vm\\{metadata['vm_name']}')
             with open(metadata['project'] + '\\metadata.json', 'w+') as f:
@@ -196,8 +209,11 @@ class CreateVM(QWidget):
                     for i in metadata['vm_name']:
                         if(i == '!' or i == '?' or i == '/' or i == ',' or i == '.' or i == '<' or i == '>'):
                             self.label_InputLabel.setText('VM Name cannot contain "!", "?", ".", ",", "<", ">"')
-                            self.label_InputLabel.setStyleSheet('Color : red;')
-
+                            self.label_InputLabel.setStyleSheet('Color : red;') 
+                        if metadata['vm_name'] in ['Win', 'win', 'Windows']:
+                            metadata['vm_type'] == 'win'
+                        else:
+                            metadata['vm_type'] == 'unknown'
                     json.dump(metadata, f, indent=3, sort_keys=True)
                     f.close()    
                     self.close()
@@ -221,3 +237,4 @@ class CreateVM(QWidget):
                 self.label_loadISO.adjustSize()
         else:
             log.info('canceled')
+            
