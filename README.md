@@ -1,5 +1,5 @@
-# 🌠 imaginary
-GUI Tool for QEMU written in Python
+# <p align="center">🌠 Imaginary</p>
+<p align="center">Your friendly QEMU GUI tool written in Python</p>
 
-[![pypresence](https://img.shields.io/badge/using-pypresence-00bb88.svg?style=for-the-badge&logo=discord&logoWidth=20)](https://github.com/qwertyquerty/pypresence)
-Requires qemu to install on src/qemu path
+![image](https://github.com/dontpanic-studios/imaginary/assets/89384053/83052549-1d92-45e3-8a05-b7f84e81b191)
+
