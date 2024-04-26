@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QListView, QAbstractItemView, QMenu
+from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QListView, QAbstractItemView, QMenu, QProxyStyle, QStyle, QApplication
 from PyQt6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
 from PyQt6 import QtCore
 from PyQt6.QtCore import QEvent
@@ -8,8 +8,15 @@ from src.gui.label import whynotclick
 from src.discord.intergration import Presence
 from src.gui.setting import info
 from src.gui.editvm import editvm
-from src.exception.QemuRunFail import *
 from dotenv import load_dotenv
+from fontTools.ttLib import TTFont
+
+print('Installing Figtree Font.')
+try:
+    font = TTFont('src\\font\\figtree.ttf')
+except FileNotFoundError:
+    print('Font File cannot be found!')
+    traceback.format_exception()
 
 githubLink = requests.get('https://api.github.com/repos/dontpanic-studios/imaginary/releases/latest')
 print('Load ENV')
@@ -18,6 +25,15 @@ try:
     VER = os.environ.get('Ver')
 except FileNotFoundError:
     print('Setting ENV File cannot be found!')
+
+class MyProxyStyle(QProxyStyle):
+    pass
+    def pixelMetric(self, QStyle_PixelMetric, option=None, widget=None):
+
+        if QStyle_PixelMetric == QStyle.PM_SmallIconSize:
+            return 60
+        else:
+            return QProxyStyle.pixelMetric(self, QStyle_PixelMetric, option, widget)
 
 class Main(QWidget):
     def __init__(self):
@@ -155,10 +171,11 @@ class Main(QWidget):
                 for i in data['desc']:
                     self.label_Vm_Desc.setText(data['desc'])
                 f.close()
-                self.label_VMInfo.setText(f'Metadata Ver  |  {data['metadata_ver']}\nMax Core  |  {data['max_core']}\nMax Ram  |  {data['max_mem']}\nDisk Size  |  {data['disk_size']}\nIs Experimental On  |  {data['isaccel']['bool']}\nAccelerator Type  |  {data['isaccel']['acceltype']}\nV-GPU Type  |  {data['vga']['type']}')
+                self.label_VMInfo.setText(f'Metadata Ver  |  {data['metadata_ver']}\nMax Core  |  {data['max_core']}\nMax Ram  |  {data['max_mem']}\nDisk Size  |  {data['disk']['disk_size']}\nIs Experimental On  |  {data['isaccel']['bool']}\nAccelerator Type  |  {data['isaccel']['acceltype']}\nV-GPU Type  |  {data['vga']['type']}')
+                item.setToolTip('Dummy')
             except:
                 print('Failed to load VM metadata!, is file even?')
-                print(traceback.print_exc())
+                print(traceback.format_exc())
                 self.label_VMInfo.setText('No Metadata has been found.')
                 self.label_VMInfo.adjustSize()    
 
@@ -213,6 +230,9 @@ class Main(QWidget):
         self.label_VMInfo.setFont(self.font_button)
         self.label_VMInfo.setStyleSheet("Color : white; background:#2C2C2C;")
 
+        self.label_Vm_Title.adjustSize()
+        self.label_Vm_Desc.adjustSize()
+
     def reloadList(self):
         # this shit is crazy! but why not?
         self.model.clear()
@@ -220,12 +240,10 @@ class Main(QWidget):
         for i in self.sub_folders:
             f = open('./src/vm/' + i + '/metadata.json', 'r+')
             data = json.load(f)
-            print('Done')
             it = QStandardItem(i)
             self.model.appendRow(it)
             it.setData(QIcon(f'src/png/{data['vm_type']}.png'.format(i)), QtCore.Qt.ItemDataRole.DecorationRole)
             self.vmListView.setModel(self.model)
-            print('Model setup done.')
             if len(self.sub_folders) > 0:
                 self.label_Vm_Title.setText('Select VM to get Started!')
                 self.label_Vm_Desc.setText('or create another one')
@@ -234,6 +252,8 @@ class Main(QWidget):
             else:
                 self.label_Snapshot.setHidden(True)
                 self.vm_Snapshot.setHidden(True)
+                self.label_Vm_Desc.adjustSize()
+                self.label_Vm_Title.adjustSize()
                 print('No VM(s) has been found, ignoring it.')  
 
 # idk why this thing wont work properly
@@ -244,11 +264,11 @@ class Main(QWidget):
         try:
             if(data['isaccel']['bool'] == False):
                 if(data['vga']['type'] == 'isa-vga'):
-                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format=raw,file={data['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']},vgamem_mb={data['vga']['mem']} {data['addition']['args']}"], stdout=subprocess.PIPE)
+                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format=raw,file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']},vgamem_mb={data['vga']['mem']} {data['addition']['args']}"], stdout=subprocess.PIPE)
                 else:
-                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format=raw,file={data['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} {data['addition']['args']}"], stdout=subprocess.PIPE)
+                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format=raw,file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} {data['addition']['args']}"], stdout=subprocess.PIPE)
             else:
-                qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format=raw,file={data['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} -accel {data['isaccel']['acceltype']} {data['addition']['args']}"], stdout=subprocess.PIPE)
+                qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format=raw,file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} -accel {data['isaccel']['acceltype']},thread=multi {data['addition']['args']}"], stdout=subprocess.PIPE)
             self.stopVM.clicked.connect(qemu.terminate)
             proc = psutil.Process(qemu.pid)
             if(proc.status == psutil.STATUS_RUNNING):
@@ -257,15 +277,14 @@ class Main(QWidget):
             self.label_Vm_Status.adjustSize() 
         except:
             print('QEMU Run Failed!')
-            trace = traceback.print_exc()
+            trace = traceback.format_exc()
             qemuRunFailed = QMessageBox(self)
             qemuRunFailed.setIcon(QMessageBox.Icon.Critical)
-            qemuRunFailed.setWindowIcon(QIcon('src/png/icons/128.png'))
+            qemuRunFailed.setWindowIcon(QIcon('src/png/icons/remove128.png'))
             qemuRunFailed.setWindowTitle('QEMU 실행 실패')
             qemuRunFailed.setText(f'QEMU 실행에 실패하였습니다.\nShow Details을 눌러 오류 사항을 확인하세요.')
-            qemuRunFailed.setDetailedText(f'Imaginary(이)가 QEMU 실행이 정상적으로 진행이 안되었다고 판단되었습니다,\n{str(trace)}')
+            qemuRunFailed.setDetailedText(f'Imaginary(이)가 QEMU 실행이 정상적으로 진행이 안되었다고 판단되었습니다,\n{trace}')
             qemuRunFailed.exec()
-            raise QemuRunVaildationFail("testing")
 
     def checkUpdate(self):
             print('Checking update')
@@ -322,4 +341,10 @@ class Main(QWidget):
             print('ignoring.')
 
 if __name__ == '__main__':
-    Presence.connect()
+    app = QApplication(sys.argv[0:]) # yeah i shouldn't doing this for presence but, no option!
+    style = MyProxyStyle('Plastique')
+    app.setStyle(style)
+    win = Main()
+    win.setupWidget()
+    win.show()
+    app.exec()

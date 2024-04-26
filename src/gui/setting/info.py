@@ -14,7 +14,7 @@ class CreateVM(QWidget):
         try:
             super().__init__()
 
-            self.setWindowTitle("Setting")
+            self.setWindowTitle("Info")
             self.setStyleSheet("background-color: #262626;") 
             self.setWindowIcon(QIcon('./src/png/icons/128.png'))
             self.setFixedSize(640, 200)
