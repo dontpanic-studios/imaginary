@@ -43,11 +43,6 @@ class EditVM(QWidget):
         self.systemTab = QWidget()
         self.debugTab = QWidget()
 
-        self.tab_VMEdit = QTabWidget(self)
-        self.tab_VMEdit.addTab(self.generalTab, 'General')
-        self.tab_VMEdit.addTab(self.systemTab, 'System')
-        self.tab_VMEdit.addTab(self.debugTab, 'Debug')
-
         # font
         font_bold_title = self.label_Title.font()
         font_bold_title.setBold(True)
@@ -71,12 +66,10 @@ class EditVM(QWidget):
         self.label_Title.setFont(font_bold_title)
         self.label_createVM.setFont(font_bold)
         self.label_VM_Name.setFont(font_button)
-        self.tab_VMEdit.setFont(font_button)
 
         self.label_Title.setStyleSheet("Color : white;")
         self.label_createVM.setStyleSheet("Color : white;")
         self.label_VM_Name.setStyleSheet("Color : white;")
-        self.tab_VMEdit.setStyleSheet("Color : white; background-color : #2c2c2c; selection-color : #2c2c2c; selection-background-color: #2c2c2c;")
 
         self.label_createVM.adjustSize()
         self.label_Title.adjustSize()

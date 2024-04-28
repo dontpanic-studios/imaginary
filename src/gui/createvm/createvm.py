@@ -35,6 +35,8 @@ class CreateVM(QWidget):
 
     def initUI(self):
         self.experimental_GPUType_List = ['virtio-gpu', 'qxl', 'isa-vga']
+        self.experimental_VMType_List = ['x86_64', 'arm', 'aarch64', 'i386', 'ppc', 'riscv32', 'riscv64']
+
         self.label_Title = QLabel('Setup your VM', self)
         self.label_InputLabel = QLabel('VM Name', self)
         self.label_InputLabel_disk = QLabel('Disk Size', self)
@@ -68,6 +70,7 @@ class CreateVM(QWidget):
         #self.experimental_OpenGL_Accel.setText('EXPERIMENTAL : Enable OpenGL (Linux Only)') 
         
         self.experimental_GPUType = QComboBox(self)
+        #self.experimental_VMType = QComboBox(self)
 
         self.diskType_RAW = QRadioButton(self)
         self.diskType_RAW.setText('RAW : RAW Disk image format, size of image is big but pretty fast')
@@ -261,6 +264,7 @@ class CreateVM(QWidget):
                         if(i == '!' or i == '?' or i == '/' or i == ',' or i == '.' or i == '<' or i == '>'):
                             self.label_InputLabel.setText('VM Name cannot contain "!", "?", ".", ",", "<", ">"')
                             self.label_InputLabel.setStyleSheet('Color : red;') 
+                            return
                         if metadata['vm_name'] in ['Win', 'win', 'Windows']:
                             metadata['vm_type'] == 'win'
                         else:
@@ -298,7 +302,6 @@ class CreateVM(QWidget):
 
         if fname[0]:
             if(fname[0] != ''):
-                if(fname[1] == '.iso'):
                     self.label_loadISO.setText(fname[0])
                     self.label_loadISO.adjustSize()
         else:

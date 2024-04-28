@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QListView, QAbstractIt
 from PyQt6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
 from PyQt6 import QtCore
 from PyQt6.QtCore import QEvent
-import os, sys, json, subprocess, requests, psutil, traceback
+import os, sys, json, subprocess, requests, psutil, traceback, shutil
 from src.gui.createvm import createvm
 from src.gui.label import whynotclick
 from src.discord.intergration import Presence
@@ -52,10 +52,9 @@ class Main(QWidget):
         
             print('initallized.')
         except Exception:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(f"ERROR Occurred!\nLog: {exc_type}, {exc_obj}, {exc_tb}, {fname}")
-            errInfoWinInit = QMessageBox.critical(self, '오류가 발생하였습니다.', '재설정을 하는 중에 오류가 발생했습니다.\n보통 프로그램이 꼬였거나, 저장된 위치에 한글이 들어있으면 안되는 경우가 있습니다.')
+            print(f"ERROR Occurred!\nLog: \n{traceback.format_exc()}")
+            errInfoWinInit = QMessageBox(self, '오류가 발생하였습니다.', '프로그램 UI를 재설정하다가 알수 없는 오류를 마주했습니다.\n자세한 내용은 Show Details.. 를 확인하세요.')
+            errInfoWinInit.setDetailedText(f'Imaginary가 실행에 실패하였습니다.\n아래엔 오류 내용입니다.\n{traceback.format_exc()}')
             print('failed to intiallized window')
             return
 
@@ -85,8 +84,6 @@ class Main(QWidget):
         self.setting.setText('Info')
         self.runVM = whynotclick.Label(self)
         self.runVM.setText('Start VM')
-        self.stopVM = whynotclick.Label(self)
-        self.stopVM.setText('Stop VM')
         self.editVM = whynotclick.Label(self)
         self.editVM.setText('Edit VM')
 
@@ -122,8 +119,7 @@ class Main(QWidget):
         self.imaginarySetting.move(450, 15)
         self.vmListView.move(15, 60)
         self.runVM.move(350, 205)
-        self.stopVM.move(450, 205)
-        self.editVM.move(550, 205)
+        self.editVM.move(450, 205)
         self.label_Vm_Status.move(350, 175)
         self.setting.move(660, 15)
         self.vm_Snapshot.move(835, 80)
@@ -171,8 +167,14 @@ class Main(QWidget):
                 for i in data['desc']:
                     self.label_Vm_Desc.setText(data['desc'])
                 f.close()
-                self.label_VMInfo.setText(f'Metadata Ver  |  {data['metadata_ver']}\nMax Core  |  {data['max_core']}\nMax Ram  |  {data['max_mem']}\nDisk Size  |  {data['disk']['disk_size']}\nIs Experimental On  |  {data['isaccel']['bool']}\nAccelerator Type  |  {data['isaccel']['acceltype']}\nV-GPU Type  |  {data['vga']['type']}')
-                item.setToolTip('Dummy')
+                args = data['addition']['args']
+
+                if(len(str(args)) >= 15):
+                    args = f'{args[0:10]}.. ({len(str(args[10:]))} char left)'
+                elif(len(str(args)) <= 0):
+                    args = 'No Arguments Found.'
+                self.label_VMInfo.setText(f'Metadata Ver  |  {data['metadata_ver']}\nMax Core  |  {data['max_core']}\nMax Ram  |  {data['max_mem']}\nDisk Size  |  {data['disk']['disk_size']}\nIs Experimental On  |  {data['isaccel']['bool']}\nAccelerator Type  |  {data['isaccel']['acceltype']}\nV-GPU Type  |  {data['vga']['type']}\nAdditional Config  |  {args}')
+                item.setToolTip('madebynotsongro')
             except:
                 print('Failed to load VM metadata!, is file even?')
                 print(traceback.format_exc())
@@ -217,8 +219,6 @@ class Main(QWidget):
         self.vmListView.setFont(self.font_button)
         self.runVM.setFont(self.font_button)
         self.runVM.setStyleSheet("Color : #4f4f4f; background-color:#2C2C2C;")
-        self.stopVM.setFont(self.font_button)
-        self.stopVM.setStyleSheet("Color : #4f4f4f; background-color:#2C2C2C;")
         self.editVM.setFont(self.font_button)
         self.editVM.setStyleSheet("Color : #4f4f4f; background-color:#2C2C2C;")
         self.label_Vm_Status.setFont(self.font_bold)
@@ -269,7 +269,6 @@ class Main(QWidget):
                     qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format=raw,file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} {data['addition']['args']}"], stdout=subprocess.PIPE)
             else:
                 qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format=raw,file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} -accel {data['isaccel']['acceltype']},thread=multi {data['addition']['args']}"], stdout=subprocess.PIPE)
-            self.stopVM.clicked.connect(qemu.terminate)
             proc = psutil.Process(qemu.pid)
             if(proc.status == psutil.STATUS_RUNNING):
                 self.label_Vm_Status.setText('Status: Running through some kind of resistance.')
@@ -318,33 +317,32 @@ class Main(QWidget):
     def eventFilter(self, source, event):
         if event.type() == QEvent.Type.ContextMenu and source is self.vmListView:
             menu = QMenu()
-            menu.addAction('Run VM')
-            menu.addAction('Edit VM')
             menu.addAction('Delete VM')
-            menu.addAction('Debug')
 
             if menu.exec(event.globalPos()):
-                item = source.itemAt(event.pos())
-                print(item.text())
+                index = source.indexAt(event.pos())
+                item = self.model.itemFromIndex(index)
+                print(f'selected item: {item.text()}')
+
+                self.confirmDeleteVM(index)
             return True
         
         return super().eventFilter(source, event)
 
     def confirmDeleteVM(self, index):
         item = self.model.itemFromIndex(index)
-        isTrue = QMessageBox.warning(self, '정말로 지울까요?', f'가상머신 {item.text()} (을)를 지울까요?\n다시는 변경하지 않아요!', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
-        response = isTrue.exec()
+        isTrue = QMessageBox.warning(self, '정말로 지울까요?', f'가상머신 {item.text()} (을)를 지울까요?\n다시는 취소할수 없어요!', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
 
-        if(response == QMessageBox.Yes):
-            print('watt')
+        if(isTrue == QMessageBox.StandardButton.Yes):
+            try:
+                shutil.rmtree(f'src\\vm\\{item.text()}')
+                success = QMessageBox.information(self, '삭제됨', f'{item.text()} (이)가 성공적으로 지워졌습니다.')
+            except:
+                failed = QMessageBox(self, '삭제 이벤트 취소됨', f'가상머신 {item.text()}를 지우다가 알수없는 오류가 발생했습니다.\n자세한 내용은 Show Details.. 를 눌러 확인하세요.')
+                failed.setDetailedText(f'미안해요!\nImaginary(이)가 폴더 "{item.text()}" 를 지우다가 알수없는 오류를 마주했습니다.\n\n폴더가 존재하지 않거나, 아니면 권한이 부족할수도 있습니다.')
+                failed.setIcon(QMessageBox.Icon.Critical)
         else:
             print('ignoring.')
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv[0:]) # yeah i shouldn't doing this for presence but, no option!
-    style = MyProxyStyle('Plastique')
-    app.setStyle(style)
-    win = Main()
-    win.setupWidget()
-    win.show()
-    app.exec()
+    Presence.connect()

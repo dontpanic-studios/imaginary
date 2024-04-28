@@ -1,1 +1,27 @@
-{"metadata_ver": "v0.3", "vm_name": "asdf", "desc": "asdf", "iso_loc": "C:/Users/sdbb2/Downloads/Win10_22H2_Korean_x64v1.iso", "max_core": 1, "max_mem": "4G", "disk_size": "10G", "disk_loc": ".\\src\\vm\\asdf\\asdf.img", "project": ".\\src\\vm\\asdf", "snapshot": ".\\src\\vm\\asdf\\snapshot.png"}
+{
+   "addition": {
+      "args": ""
+   },
+   "desc": "asdf",
+   "disk": {
+      "disk_loc": ".\\src\\vm\\asdf\\asdf.img",
+      "disk_size": "No Disk Avaliable",
+      "disk_type": "vhdx"
+   },
+   "isaccel": {
+      "acceltype": "tcg",
+      "bool": false
+   },
+   "iso_loc": "Select ISO Location..",
+   "max_core": "",
+   "max_mem": "",
+   "metadata_ver": "v1.0b",
+   "project": ".\\src\\vm\\asdf",
+   "snapshot": ".\\src\\vm\\asdf\\snapshot.png",
+   "vga": {
+      "mem": "",
+      "type": "virtio-gpu"
+   },
+   "vm_name": "asdf",
+   "vm_type": "unknown"
+}
