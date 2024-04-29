@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QListView, QAbstractItemView, QMenu, QProxyStyle, QStyle, QApplication
+from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QListView, QAbstractItemView, QMenu, QProxyStyle, QStyle
 from PyQt6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
 from PyQt6 import QtCore
 from PyQt6.QtCore import QEvent
@@ -238,23 +238,26 @@ class Main(QWidget):
         self.model.clear()
         self.sub_folders = [name for name in os.listdir('src/vm/') if os.path.isdir(os.path.join('src/vm/', name))]
         for i in self.sub_folders:
-            f = open('./src/vm/' + i + '/metadata.json', 'r+')
-            data = json.load(f)
-            it = QStandardItem(i)
-            self.model.appendRow(it)
-            it.setData(QIcon(f'src/png/{data['vm_type']}.png'.format(i)), QtCore.Qt.ItemDataRole.DecorationRole)
-            self.vmListView.setModel(self.model)
-            if len(self.sub_folders) > 0:
-                self.label_Vm_Title.setText('Select VM to get Started!')
-                self.label_Vm_Desc.setText('or create another one')
-                self.label_Vm_Title.adjustSize()
-                self.label_Vm_Desc.adjustSize()
+            if i != 'drivers':
+                f = open('./src/vm/' + i + '/metadata.json', 'r+')
+                data = json.load(f)
+                it = QStandardItem(i)
+                self.model.appendRow(it)
+                it.setData(QIcon(f'src/png/{data['vm_type']}.png'.format(i)), QtCore.Qt.ItemDataRole.DecorationRole)
+                self.vmListView.setModel(self.model)
+                if len(self.sub_folders) > 0:
+                    self.label_Vm_Title.setText('Select VM to get Started!')
+                    self.label_Vm_Desc.setText('or create another one')
+                    self.label_Vm_Title.adjustSize()
+                    self.label_Vm_Desc.adjustSize()
+                else:
+                    self.label_Snapshot.setHidden(True)
+                    self.vm_Snapshot.setHidden(True)
+                    self.label_Vm_Desc.adjustSize()
+                    self.label_Vm_Title.adjustSize()
+                    print('No VM(s) has been found, ignoring it.')  
             else:
-                self.label_Snapshot.setHidden(True)
-                self.vm_Snapshot.setHidden(True)
-                self.label_Vm_Desc.adjustSize()
-                self.label_Vm_Title.adjustSize()
-                print('No VM(s) has been found, ignoring it.')  
+                print('driver folder found, ignoring.')        
 
 # idk why this thing wont work properly
     def runQemu(self):
@@ -264,15 +267,29 @@ class Main(QWidget):
         try:
             if(data['isaccel']['bool'] == False):
                 if(data['vga']['type'] == 'isa-vga'):
-                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format=raw,file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']},vgamem_mb={data['vga']['mem']} {data['addition']['args']}"], stdout=subprocess.PIPE)
+                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']},vgamem_mb={data['vga']['mem']} {data['addition']['args']}"], stdout=subprocess.PIPE)
                 else:
-                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format=raw,file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} {data['addition']['args']}"], stdout=subprocess.PIPE)
+                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} {data['addition']['args']}"], stdout=subprocess.PIPE)
             else:
-                qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format=raw,file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} -accel {data['isaccel']['acceltype']},thread=multi {data['addition']['args']}"], stdout=subprocess.PIPE)
+                qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} -accel {data['isaccel']['acceltype']},thread=multi {data['addition']['args']}"], stdout=subprocess.PIPE)
             proc = psutil.Process(qemu.pid)
-            if(proc.status == psutil.STATUS_RUNNING):
-                self.label_Vm_Status.setText('Status: Running through some kind of resistance.')
+            if(proc.status() == psutil.STATUS_RUNNING):
+                self.label_Vm_Status.setText('Status: VM Started')
                 self.label_Vm_Status.setStyleSheet('Color : #42f566; background-color: #2C2C2C;')
+            elif proc.status() == psutil.STATUS_STOPPED:
+                self.label_Vm_Status.setText('Status: VM Stopped')
+                self.label_Vm_Status.setStyleSheet('Color : white; background-color: #2C2C2C;')
+            elif proc.status() == psutil.STATUS_DEAD:
+                self.label_Vm_Status.setText('Status: VM Stopped')
+                self.label_Vm_Status.setStyleSheet('Color : white; background-color: #2C2C2C;')  
+            elif proc.status() == psutil.STATUS_WAITING:
+                self.label_Vm_Status.setText('Status: Waiting User response..')
+                self.label_Vm_Status.setStyleSheet('Color : #e0b44c; background-color: #2c2c2c;')   
+            elif proc.status() == psutil.STATUS_ZOMBIE:
+                self.label_Vm_Status.setText('Status: Waiting User response..')
+                self.label_Vm_Status.setStyleSheet('Color : #e0b44c; background-color: #2c2c2c;')
+            else:
+                self.label_Vm_Status.setText('Status: VM Stopped incorrectly')
             self.label_Vm_Status.adjustSize() 
         except:
             print('QEMU Run Failed!')
@@ -319,12 +336,22 @@ class Main(QWidget):
             menu = QMenu()
             menu.addAction('Delete VM')
 
-            if menu.exec(event.globalPos()):
-                index = source.indexAt(event.pos())
-                item = self.model.itemFromIndex(index)
-                print(f'selected item: {item.text()}')
+            try:
+                if menu.exec(event.globalPos()):
+                    index = source.indexAt(event.pos())
+                    item = self.model.itemFromIndex(index)
+                    print(f'selected item: {item.text()}')
 
-                self.confirmDeleteVM(index)
+                    self.confirmDeleteVM(index)
+            except:
+                trace = traceback.format_exc()
+                qemuRunFailed = QMessageBox(self)
+                qemuRunFailed.setIcon(QMessageBox.Icon.Critical)
+                qemuRunFailed.setWindowIcon(QIcon('src/png/icons/remove128.png'))
+                qemuRunFailed.setWindowTitle('알수없는 오류 발생')
+                qemuRunFailed.setText(f'가상머신을 삭제하는데 실패하였습니다.\nShow Details을 눌러 오류 사항을 확인하세요.')
+                qemuRunFailed.setDetailedText(f'Imaginary(이)가 가상머신 삭제(이)가 정상적으로 진행이 안되었다고 판단되었습니다, 다음은 관련된 오류내용입니다.\n{trace}')
+                qemuRunFailed.exec()  
             return True
         
         return super().eventFilter(source, event)
@@ -337,6 +364,7 @@ class Main(QWidget):
             try:
                 shutil.rmtree(f'src\\vm\\{item.text()}')
                 success = QMessageBox.information(self, '삭제됨', f'{item.text()} (이)가 성공적으로 지워졌습니다.')
+                self.reloadList()
             except:
                 failed = QMessageBox(self, '삭제 이벤트 취소됨', f'가상머신 {item.text()}를 지우다가 알수없는 오류가 발생했습니다.\n자세한 내용은 Show Details.. 를 눌러 확인하세요.')
                 failed.setDetailedText(f'미안해요!\nImaginary(이)가 폴더 "{item.text()}" 를 지우다가 알수없는 오류를 마주했습니다.\n\n폴더가 존재하지 않거나, 아니면 권한이 부족할수도 있습니다.')
