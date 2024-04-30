@@ -4,6 +4,7 @@ from PyQt6 import QtCore
 from src.gui.label import whynotclick
 import os, sys, logging, json, subprocess, traceback
 from dotenv import load_dotenv
+from difflib import SequenceMatcher
 
 log = logging
 logFilePath = './log/debug-log.log'
@@ -250,7 +251,7 @@ class CreateVM(QWidget):
 
         if metadata['isaccel']['bool'] == True:
             msg = QMessageBox.warning(self, '실험적 기능 켜짐', '경고!\n\n하드웨어 가상화가 켜져있습니다!\n해당 기능은 특정 기기에서 작동이 안될수 있습니다!')
-        if metadata['vga']['type'] != 'virtio-gpu' or 'virtio-gpu-gl':
+        if metadata['vga']['type'] != 'virtio-gpu' or metadata['vga']['type'] != 'virtio-gpu-gl':
             msg = QMessageBox.warning(self, '저속 그래픽 사용', 'virtio-gpu 그래픽과 달리 저속 그래픽 세팅을 사용하고 있습니다!\n가상머신의 성능 저하가 있을수 있습니다.')
         if metadata['vga']['type'] == 'virtio-gpu' and metadata['vga']['mem'] != '':
             msg = QMessageBox.critical(self, '그래픽 메모리 지원 안됨', '선택한 그래픽 세팅은 메모리 변경이 불가능한 세팅입니다,\n"qxl" 또는 "isa-vga" 로 바꿔주세요.')    
@@ -272,10 +273,18 @@ class CreateVM(QWidget):
                             self.label_InputLabel.setText('VM Name cannot contain "!", "?", ".", ",", "<", ">"')
                             self.label_InputLabel.setStyleSheet('Color : red;') 
                             return
-                        if metadata['vm_name'] in ['Win', 'win', 'Windows']:
-                            metadata['vm_type'] == 'win'
+                        chkSimilarWin = SequenceMatcher(None, metadata['vm_name'], 'windows').ratio()
+                        chkSimilarMac = SequenceMatcher(None, metadata['vm_name'], 'macos').ratio()
+
+                        print(f'similar to: {chkSimilarWin}, {chkSimilarMac}')
+
+                        if chkSimilarWin >= 0.5:
+                            metadata['vm_type'] = 'win'
+                        elif chkSimilarMac >= 0.5:
+                            metadata['vm_type'] = 'mac'
                         else:
-                            metadata['vm_type'] == 'unknown'
+                            metadata['vm_type'] = 'unknown'    
+
                     if(metadata['desc'] == ''):
                         metadata['desc'] = 'No Description Avaliable' 
                     if(metadata['disk']['disk_size'] == ''):

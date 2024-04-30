@@ -1,0 +1,30 @@
+{
+   "addition": {
+      "args": " -hdb fat:rw:src/vm/drivers/"
+   },
+   "audio": {
+      "type": "ac97"
+   },
+   "desc": "Arch Linux ARM",
+   "disk": {
+      "disk_loc": ".\\src\\vm\\ArchLinux\\ArchLinux.img",
+      "disk_size": "No Disk Avaliable",
+      "disk_type": "vhdx"
+   },
+   "isaccel": {
+      "acceltype": "tcg",
+      "bool": true
+   },
+   "iso_loc": "C:/Users/sdbb2q/Downloads/jdk-17_windows-x64_bin.exe",
+   "max_core": "2",
+   "max_mem": "4G",
+   "metadata_ver": "v1.1b",
+   "project": ".\\src\\vm\\ArchLinux",
+   "snapshot": ".\\src\\vm\\ArchLinux\\snapshot.png",
+   "vga": {
+      "mem": "",
+      "type": "vmware-svga"
+   },
+   "vm_name": "ArchLinux",
+   "vm_type": "unknown"
+}
