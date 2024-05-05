@@ -1,14 +1,17 @@
 from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QListView, QAbstractItemView, QMenu, QProxyStyle, QStyle
 from PyQt6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
 from PyQt6 import QtCore
-from PyQt6.QtCore import QEvent
-import os, sys, json, subprocess, requests, psutil, traceback, shutil
+from PyQt6.QtCore import QEvent, QMimeDatabase
+import os, sys, json, subprocess, requests, psutil, traceback, shutil, src.discord, shutil
+import src.discord.intergration
 from src.gui.createvm import createvm
+from datetime import date
 from src.gui.label import whynotclick
 from src.discord.intergration import Presence
 from src.gui.setting import info
 from src.gui.editvm import editvm
 from dotenv import load_dotenv
+from pathlib import Path
 from fontTools.ttLib import TTFont
 
 print('Installing Figtree Font.')
@@ -47,6 +50,7 @@ class Main(QWidget):
             self.setStyleSheet("background-color: #262626; Color : white;") 
             self.setWindowIcon(QIcon('src/png/icons/128.png'))
             self.setFixedSize(1280, 720)
+            self.setAcceptDrops(True)
             self.setWindowFlags(QtCore.Qt.WindowType.WindowCloseButtonHint | QtCore.Qt.WindowType.WindowMinimizeButtonHint)
             self.setupWidget()
         
@@ -168,13 +172,19 @@ class Main(QWidget):
                     self.label_Vm_Desc.setText(data['desc'])
                 f.close()
                 args = data['addition']['args']
+                desc = data['desc']
 
                 if(len(str(args)) >= 15):
                     args = f'{args[0:10]}.. ({len(str(args[10:]))} char left)'
                 elif(len(str(args)) <= 0):
                     args = 'No Arguments Found.'
+
+                if(len(str(desc)) >= 15):
+                    self.label_Vm_Desc.setText(f'{desc[0:10]}.. ({len(str(desc[10:]))} char left)')
+                    self.label_Vm_Desc.setToolTip(data['desc'])
+                elif(len(str(args)) <= 0):
+                    self.label_Vm_Desc.setText('No Description Found.')   
                 self.label_VMInfo.setText(f'Metadata Ver  |  {data['metadata_ver']}\nMax Core  |  {data['max_core']}\nMax Ram  |  {data['max_mem']}\nDisk Size  |  {data['disk']['disk_size']}\nIs Experimental On  |  {data['isaccel']['bool']}\nAccelerator Type  |  {data['isaccel']['acceltype']}\nV-GPU Type  |  {data['vga']['type']}\nAdditional Config  |  {args}')
-                item.setToolTip('madebynotsongro')
             except:
                 print('Failed to load VM metadata!, is file even?')
                 print(traceback.format_exc())
@@ -186,10 +196,15 @@ class Main(QWidget):
                 self.label_Snapshot.setPixmap(QPixmap(data['snapshot']))
             except:
                 print('File not found, returing default state.')
-                self.label_Snapshot.setPixmap(QPixmap('src/png/snapshot.png'))    
-            self.runVM.clicked.connect(self.runQemu)
-            self.editVM.clicked.connect(self.showEditWindow)
-            self.runVM.setStyleSheet("Color : #59d97b; background-color:#2C2C2C;")
+                self.label_Snapshot.setPixmap(QPixmap('src/png/snapshot.png'))   
+
+            if(data['disk']['disk_size'] != 'No Disk Avaliable'):
+                self.runVM.clicked.connect(self.runQemu)
+                self.runVM.setStyleSheet("Color : #59d97b; background-color:#2C2C2C;")
+            else:
+                self.runVM.setToolTip('Cannot run this vm cause no disk has been found.')  
+ 
+            self.editVM.clicked.connect(self.showEditWindow)    
             self.editVM.setStyleSheet("Color : #f5cb58; background-color:#2C2C2C;")
 
             self.label_Vm_Desc.adjustSize()
@@ -273,24 +288,19 @@ class Main(QWidget):
             else:
                 qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} -accel {data['isaccel']['acceltype']},thread=multi {data['addition']['args']}"], stdout=subprocess.PIPE)
             proc = psutil.Process(qemu.pid)
-            if(proc.status() == psutil.STATUS_RUNNING):
+            while(proc.status() == psutil.STATUS_RUNNING):
                 self.label_Vm_Status.setText('Status: VM Started')
                 self.label_Vm_Status.setStyleSheet('Color : #42f566; background-color: #2C2C2C;')
-            elif proc.status() == psutil.STATUS_STOPPED:
-                self.label_Vm_Status.setText('Status: VM Stopped')
-                self.label_Vm_Status.setStyleSheet('Color : white; background-color: #2C2C2C;')
-            elif proc.status() == psutil.STATUS_DEAD:
-                self.label_Vm_Status.setText('Status: VM Stopped')
-                self.label_Vm_Status.setStyleSheet('Color : white; background-color: #2C2C2C;')  
-            elif proc.status() == psutil.STATUS_WAITING:
-                self.label_Vm_Status.setText('Status: Waiting User response..')
-                self.label_Vm_Status.setStyleSheet('Color : #e0b44c; background-color: #2c2c2c;')   
-            elif proc.status() == psutil.STATUS_ZOMBIE:
-                self.label_Vm_Status.setText('Status: Waiting User response..')
-                self.label_Vm_Status.setStyleSheet('Color : #e0b44c; background-color: #2c2c2c;')
-            else:
-                self.label_Vm_Status.setText('Status: VM Stopped incorrectly')
-            self.label_Vm_Status.adjustSize() 
+                Presence.update(src.discord.intergration)
+                chkStatus = proc.status()
+
+                if(chkStatus == psutil.STATUS_DEAD):
+                    self.label_Vm_Status.setText('Status: VM Stopped')
+                    self.label_Vm_Status.setStyleSheet('Color : white; background-color: #2C2C2C;')
+                elif proc.status() == psutil.STATUS_WAITING:
+                    self.label_Vm_Status.setText('Status: Waiting User response..')
+                    self.label_Vm_Status.setStyleSheet('Color : #e0b44c; background-color: #2c2c2c;')
+                self.label_Vm_Status.adjustSize() 
         except:
             print('QEMU Run Failed!')
             trace = traceback.format_exc()
@@ -334,15 +344,19 @@ class Main(QWidget):
     def eventFilter(self, source, event):
         if event.type() == QEvent.Type.ContextMenu and source is self.vmListView:
             menu = QMenu()
-            menu.addAction('Delete VM')
+            delvm = menu.addAction('Delete VM')
+            export_vm = menu.addAction('Export VM')
 
             try:
                 if menu.exec(event.globalPos()):
                     index = source.indexAt(event.pos())
                     item = self.model.itemFromIndex(index)
+                    action = menu.exec(event.globalPos())
                     print(f'selected item: {item.text()}')
-
-                    self.confirmDeleteVM(index)
+                    if action == delvm:
+                        self.confirmDeleteVM(index)
+                    elif action == export_vm:
+                        self.exportVM(index)    
             except:
                 trace = traceback.format_exc()
                 qemuRunFailed = QMessageBox(self)
@@ -371,6 +385,63 @@ class Main(QWidget):
                 failed.setIcon(QMessageBox.Icon.Critical)
         else:
             print('ignoring.')
+
+    def exportVM(self, index):
+        item = self.model.itemFromIndex(index)
+        vmloc = f'src/vm/{item.text()}'
+
+        try:
+            shutil.make_archive(f'{item.text()}-exported-{date.today()}', 'zip', vmloc)
+            succ = QMessageBox.information(self, '가상머샌 내보냄', f'{item.text()}(이)가 {os.getcwd()}로 내보내졌습니다.')
+        except:
+            failed = QMessageBox(self)
+            failed.setWindowTitle('가상머신 내보내기 이벤트 취소됨')
+            failed.setWindowIcon(QIcon('src/png/icons/remove128.png'))
+            failed.setText(f'가상머신 {item.text()}를 내보내다가 알수없는 오류가 발생했습니다.\n자세한 내용은 Show Details.. 를 눌러 확인하세요.')
+            failed.setDetailedText(f'미안해요!\nImaginary(이)가 "{item.text()}" 를 zip 확장자로 내보내다가 알수없는 오류를 마주했습니다.\n\n폴더가 존재하지 않거나, 아니면 권한이 부족할수도 있습니다.\n\n{traceback.format_exc()}')
+            failed.setIcon(QMessageBox.Icon.Critical)
+            failed.exec()
+
+    def loadExportedVM(self, url):
+        print(f'trying to unpack vm: {url}')
+        try:
+            filename = Path(url).stem
+            shutil.unpack_archive(url, f'src/vm/{filename}', 'zip')
+            self.reloadList()
+            print('successfully loaded vm.')
+            succ = QMessageBox.information(self, '가상머신 불러와짐', f'{filename}을 성공적으로 불러왔습니다.')
+        except FileExistsError:
+            failed = QMessageBox(self, '가상머신 불러오기 이벤트 취소됨', f'{filename}(이)가 이미 존재하여 취소하였습니다.')  
+
+    def dragEnterEvent(self, event):
+        if self.findExportedZip(event.mimeData()):
+            event.accept()
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event):
+        if self.findExportedZip(event.mimeData()):
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        urls = self.findExportedZip(event.mimeData())
+        if urls:
+            for url in urls:
+                self.loadExportedVM(url.toLocalFile())
+            event.accept()
+        else:
+            event.ignore()
+
+    def findExportedZip(self, mimedata):
+        urls = list()
+        db = QMimeDatabase()
+        for url in mimedata.urls():
+            mimetype = db.mimeTypeForUrl(url)
+            if mimetype.name() == "application/zip":
+                urls.append(url)
+        return urls  
 
 if __name__ == '__main__':
     Presence.connect()
