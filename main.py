@@ -10,6 +10,7 @@ from src.gui.label import whynotclick
 from src.discord.intergration import Presence
 from src.gui.setting import info
 from src.gui.editvm import editvm
+from src.gui.disktool import disk
 from dotenv import load_dotenv
 from pathlib import Path
 from fontTools.ttLib import TTFont
@@ -71,13 +72,10 @@ class Main(QWidget):
         self.label_Vm_Title = QLabel("No VM has been found!", self)
         self.label_Vm_Desc = QLabel("Why don't you make one?", self)
         self.label_Vm_Status = QLabel("Status: No VM status available.", self)
-        self.vm_Snapshot = QLabel(self)
-        self.label_Snapshot = QLabel("Last Snapshot", self)
         self.label_VMInfo = QLabel('No Metadata has been found.', self)
 
         # image
-        self.vm_background.setPixmap(QPixmap('src/png/background/bg1.png'))        
-        self.vm_Snapshot.setPixmap(QPixmap('src/png/snapshot.png'))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+        self.vm_background.setPixmap(QPixmap('src/png/background/bg1.png'))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
 
         # button
         self.createVM = whynotclick.Label(self)
@@ -90,6 +88,8 @@ class Main(QWidget):
         self.runVM.setText('Start VM')
         self.editVM = whynotclick.Label(self)
         self.editVM.setText('Edit VM')
+        self.diskTool = whynotclick.Label(self)
+        self.diskTool.setText('Disk Tool')
 
         # vm list
         self.vmListView = QListView(self)
@@ -125,21 +125,19 @@ class Main(QWidget):
         self.runVM.move(350, 205)
         self.editVM.move(450, 205)
         self.label_Vm_Status.move(350, 175)
-        self.setting.move(660, 15)
-        self.vm_Snapshot.move(835, 80)
-        self.label_Snapshot.move(835, 480)
+        self.setting.move(760, 15)
         self.label_VMInfo.move(350, 255)
+        self.diskTool.move(660, 15)
 
         self.vmListView.resize(290, 645)
         self.vmListView.clicked[QtCore.QModelIndex].connect(self.on_clicked)
         self.vmListView.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-
-        self.vm_Snapshot.resize(400, 400)
         
         self.imaginarySetting.clicked.connect(self.reloadList)
         self.createVM.clicked.connect(self.showCreateVMWindow)
         self.setting.clicked.connect(self.showSettingWindow)
         self.label_Title.clicked.connect(self.vmListView.clearSelection)
+        self.diskTool.clicked.connect(self.showDiskToolWindow)
 
         self.vmListView.installEventFilter(self)
         self.setLabelFont()
@@ -159,7 +157,7 @@ class Main(QWidget):
         self.w = editvm.EditVM(self.label_Vm_Title.text())
         self.w.show()        
 
-    def on_clicked(self, index):
+    def on_clicked(self, index): # load data
         print('Retriving Info from metadata.json')
         try:
             item = self.model.itemFromIndex(index)
@@ -189,14 +187,7 @@ class Main(QWidget):
                 print('Failed to load VM metadata!, is file even?')
                 print(traceback.format_exc())
                 self.label_VMInfo.setText('No Metadata has been found.')
-                self.label_VMInfo.adjustSize()    
-
-            try:
-                print('Load snapshot')
-                self.label_Snapshot.setPixmap(QPixmap(data['snapshot']))
-            except:
-                print('File not found, returing default state.')
-                self.label_Snapshot.setPixmap(QPixmap('src/png/snapshot.png'))   
+                self.label_VMInfo.adjustSize()  
 
             if(data['disk']['disk_size'] != 'No Disk Avaliable'):
                 self.runVM.clicked.connect(self.runQemu)
@@ -240,10 +231,10 @@ class Main(QWidget):
         self.label_Vm_Status.setStyleSheet("Color : white; background-color:#2C2C2C;")
         self.setting.setFont(self.font_button)
         self.setting.setStyleSheet("Color : white; background-color:#262626;")
-        self.label_Snapshot.setFont(self.font_button)
-        self.label_Snapshot.setStyleSheet("Color : white; background:#2C2C2C;")
         self.label_VMInfo.setFont(self.font_button)
         self.label_VMInfo.setStyleSheet("Color : white; background:#2C2C2C;")
+        self.diskTool.setFont(self.font_button)
+        self.diskTool.setStyleSheet("Color : white; background-color:#262626;")
 
         self.label_Vm_Title.adjustSize()
         self.label_Vm_Desc.adjustSize()
@@ -266,40 +257,41 @@ class Main(QWidget):
                     self.label_Vm_Title.adjustSize()
                     self.label_Vm_Desc.adjustSize()
                 else:
-                    self.label_Snapshot.setHidden(True)
-                    self.vm_Snapshot.setHidden(True)
                     self.label_Vm_Desc.adjustSize()
                     self.label_Vm_Title.adjustSize()
                     print('No VM(s) has been found, ignoring it.')  
             else:
                 print('driver folder found, ignoring.')        
 
-# idk why this thing wont work properly
-    def runQemu(self):
+    def runQemu(self): # qemu run function
         print('Load Model')
         f = open('./src/vm/' + self.label_Vm_Title.text() + '/metadata.json', 'r+')
         data = json.load(f)
         try:
             if(data['isaccel']['bool'] == False):
                 if(data['vga']['type'] == 'isa-vga'):
-                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']},vgamem_mb={data['vga']['mem']} {data['addition']['args']}"], stdout=subprocess.PIPE)
+                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-{data['emulate']} -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']},vgamem_mb={data['vga']['mem']} {data['addition']['args']}"], stdout=subprocess.PIPE)
                 else:
-                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} {data['addition']['args']}"], stdout=subprocess.PIPE)
+                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-{data['emulate']} -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} {data['addition']['args']}"], stdout=subprocess.PIPE)
             else:
-                qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-x86_64 -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} -accel {data['isaccel']['acceltype']},thread=multi {data['addition']['args']}"], stdout=subprocess.PIPE)
+                qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-{data['emulate']} -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} -accel {data['isaccel']['acceltype']},thread=multi {data['addition']['args']}"], stdout=subprocess.PIPE)
             proc = psutil.Process(qemu.pid)
-            while(proc.status() == psutil.STATUS_RUNNING):
-                self.label_Vm_Status.setText('Status: VM Started')
-                self.label_Vm_Status.setStyleSheet('Color : #42f566; background-color: #2C2C2C;')
-                Presence.update(src.discord.intergration)
-                chkStatus = proc.status()
+            try:
+                while(proc.status() == psutil.STATUS_RUNNING):
+                    self.label_Vm_Status.setText('Status: VM Started')
+                    self.label_Vm_Status.setStyleSheet('Color : #42f566; background-color: #2C2C2C;')
+                    chkStatus = proc.status()
 
-                if(chkStatus == psutil.STATUS_DEAD):
-                    self.label_Vm_Status.setText('Status: VM Stopped')
-                    self.label_Vm_Status.setStyleSheet('Color : white; background-color: #2C2C2C;')
-                elif proc.status() == psutil.STATUS_WAITING:
-                    self.label_Vm_Status.setText('Status: Waiting User response..')
-                    self.label_Vm_Status.setStyleSheet('Color : #e0b44c; background-color: #2c2c2c;')
+                    if(chkStatus == psutil.STATUS_DEAD):
+                        self.label_Vm_Status.setText('Status: VM Stopped')
+                        self.label_Vm_Status.setStyleSheet('Color : white; background-color: #2C2C2C;')
+                    elif proc.status() == psutil.STATUS_WAITING:
+                        self.label_Vm_Status.setText('Status: Waiting User response..')
+                        self.label_Vm_Status.setStyleSheet('Color : #e0b44c; background-color: #2c2c2c;')
+                    self.label_Vm_Status.adjustSize() 
+            except psutil.NoSuchProcess:
+                self.label_Vm_Status.setText('Status: VM Process cannot be found.')
+                self.label_Vm_Status.setStyleSheet('Color : red; background-color: #2C2C2C;') 
                 self.label_Vm_Status.adjustSize() 
         except:
             print('QEMU Run Failed!')
@@ -341,22 +333,21 @@ class Main(QWidget):
             elif(githubLatestVer == VER):
                 print(f"최신버전을 사용하고 있습니다!")
 
-    def eventFilter(self, source, event):
+    def eventFilter(self, source, event): # context menu (right click menu)
         if event.type() == QEvent.Type.ContextMenu and source is self.vmListView:
             menu = QMenu()
             delvm = menu.addAction('Delete VM')
             export_vm = menu.addAction('Export VM')
 
             try:
-                if menu.exec(event.globalPos()):
-                    index = source.indexAt(event.pos())
-                    item = self.model.itemFromIndex(index)
-                    action = menu.exec(event.globalPos())
-                    print(f'selected item: {item.text()}')
-                    if action == delvm:
-                        self.confirmDeleteVM(index)
-                    elif action == export_vm:
-                        self.exportVM(index)    
+                index = source.indexAt(event.pos())
+                item = self.model.itemFromIndex(index)
+                action = menu.exec(event.globalPos())
+                print(f'selected item: {item.text()}')
+                if action == delvm:
+                    self.confirmDeleteVM(index)
+                elif action == export_vm:
+                    self.exportVM(index)    
             except:
                 trace = traceback.format_exc()
                 qemuRunFailed = QMessageBox(self)
@@ -392,7 +383,7 @@ class Main(QWidget):
 
         try:
             shutil.make_archive(f'{item.text()}-exported-{date.today()}', 'zip', vmloc)
-            succ = QMessageBox.information(self, '가상머샌 내보냄', f'{item.text()}(이)가 {os.getcwd()}로 내보내졌습니다.')
+            succ = QMessageBox.information(self, '가상머신 내보내짐', f'{item.text()} (이)가 {os.getcwd()} (으)로 내보내졌습니다.')
         except:
             failed = QMessageBox(self)
             failed.setWindowTitle('가상머신 내보내기 이벤트 취소됨')
@@ -442,6 +433,11 @@ class Main(QWidget):
             if mimetype.name() == "application/zip":
                 urls.append(url)
         return urls  
+
+    def showDiskToolWindow(self):
+        print("Opening DisktoolWin...")
+        self.w = disk.DiskTool()
+        self.w.show()      
 
 if __name__ == '__main__':
     Presence.connect()
