@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QLineEdit, QFileDialog, QCheckBox, QComboBox, QRadioButton
 from PyQt6.QtGui import QIcon
 from PyQt6 import QtCore
+from PyQt6.QtCore import QSize
 from src.gui.label import whynotclick
 import os, sys, logging, json, subprocess, traceback
 from dotenv import load_dotenv
@@ -36,7 +37,7 @@ class CreateVM(QWidget):
 
     def initUI(self):
         self.experimental_GPUType_List = ['virtio-gpu', 'qxl', 'isa-vga', 'vmware-svga', 'none', 'virtio-gpu-gl']
-        self.experimental_VMType_List = ['x86_64', 'arm', 'aarch64', 'i386', 'ppc', 'riscv32', 'riscv64']
+        self.experimental_VMType_List = ['x86_64', 'arm', 'aarch64', 'i386', 'ppc', 'riscv32', 'riscv64', 'ppc64']
 
         self.label_Title = QLabel('Setup your VM', self)
         self.label_InputLabel = QLabel('VM Name', self)
@@ -69,9 +70,11 @@ class CreateVM(QWidget):
         self.whybutdontcreatedisk = QCheckBox(self, text='Skip Disk Creation')
         self.experimental_OpenGL_Accel = QCheckBox(self)
         self.experimental_OpenGL_Accel.setText('Add Driver Disk to VM') 
+        self.experimental_isLegacy = QCheckBox(self)
+        self.experimental_isLegacy.setText('Set QEMU as Legacy Mode (BIOS, Non-UEFI)')
         
         self.experimental_GPUType = QComboBox(self)
-        #self.experimental_VMType = QComboBox(self)
+        self.experimental_VMType = QComboBox(self)
 
         self.diskType_RAW = QRadioButton(self)
         self.diskType_RAW.setText('RAW : RAW Disk image format, size of image is big but pretty fast')
@@ -123,6 +126,7 @@ class CreateVM(QWidget):
         self.whybutdontcreatedisk.move(20, 420)
         self.Input_SysCoreSize.move(300, 240)
         self.label_SysCoreSize.move(300, 210)
+        self.experimental_isLegacy.move(20, 225)
 
         self.label_Title.setFont(font_bold_title)
         self.Input_VMName.setFont(font_button)
@@ -147,8 +151,10 @@ class CreateVM(QWidget):
         self.experimental_OpenGL_Accel.setFont(font_button)
         self.label_turnFrameBack.setFont(font_bold)
         self.diskType_VHDX.setFont(font_radio)
+        self.experimental_isLegacy.setFont(font_button)
         self.diskType_QCOW2.setFont(font_radio)
         self.diskType_RAW.setFont(font_radio)
+        self.experimental_VMType.setFont(font_button)
         self.label_DiskType.setFont(font_button)
         self.label_SysCoreSize.setFont(font_button)
 
@@ -164,12 +170,14 @@ class CreateVM(QWidget):
         self.label_InputLabel_disk.setStyleSheet("Color : white;")
         self.Input_DiskSize.setStyleSheet("Color : white;")
         self.experimental_OpenGL_Accel.setStyleSheet("Color : white;")
+        self.experimental_VMType.setStyleSheet("Color : white;")
         self.label_RamSize.setStyleSheet("Color : white;")
         self.Input_RamSize.setStyleSheet("Color : white;")
         self.Input_VGAMemSize.setStyleSheet("Color : white;")
         self.experimental_HAX_Accel.setStyleSheet("Color : white;")
         self.label_VGAMemSize.setStyleSheet("Color : white;")
         self.experimental_GPUType.setStyleSheet("Color : white;")
+        self.experimental_isLegacy.setStyleSheet("Color : white;")
         self.label_GPUType.setStyleSheet("Color : white;")
         self.experimental_Input_StartupArg.setStyleSheet("Color : white;")
         self.whybutdontcreatedisk.setStyleSheet("Color : white;")
@@ -204,6 +212,8 @@ class CreateVM(QWidget):
         self.label_turnFrameBack.adjustSize()
         self.Input_SysCoreSize.adjustSize()
         self.label_SysCoreSize.adjustSize()
+        self.experimental_isLegacy.adjustSize()
+        self.experimental_VMType.adjustSize()
 
         self.Input_VMName.setPlaceholderText('eg) Windows 11')
         self.Input_VMDesc.setPlaceholderText('eg) Description Text')
@@ -214,13 +224,18 @@ class CreateVM(QWidget):
         self.experimental_Input_StartupArg.setPlaceholderText('Startup Arguments')
         self.label_loadISO.clicked.connect(self.loadISO)
 
+        self.Input_VMName.setToolTip('Virtual Machine Name cannot contain ., /, \, ), (')
+        self.Input_VGAMemSize.setToolTip('Virtual GPU Memory must include when using other than "virtio-gpu", "virtio-gpu-gl".')
+
         self.experimental_GPUType.addItems(self.experimental_GPUType_List)
+        self.experimental_VMType.addItems(self.experimental_VMType_List)
 
     def saveChange(self):
         metadata = {
             'metadata_ver': os.environ.get('Ver'),
             'vm_name': self.Input_VMName.text(),
             'vm_type': 'unknown',
+            'emulate': self.experimental_VMType.currentText(),
             'desc': self.Input_VMDesc.text(),
             'iso_loc': self.label_loadISO.text(),
             'max_core': self.Input_SysCoreSize.text(),
@@ -245,7 +260,8 @@ class CreateVM(QWidget):
             },
             'addition': {
                 'args': self.experimental_Input_StartupArg.text()
-            }
+            },
+            'isLegacyMode': self.experimental_isLegacy.isChecked()
         }
         print(f'vm setting: \n{metadata}')
 
@@ -256,12 +272,13 @@ class CreateVM(QWidget):
         if metadata['vga']['type'] == 'virtio-gpu' and metadata['vga']['mem'] != '':
             msg = QMessageBox.critical(self, '그래픽 메모리 지원 안됨', '선택한 그래픽 세팅은 메모리 변경이 불가능한 세팅입니다,\n"qxl" 또는 "isa-vga" 로 바꿔주세요.')    
             return
-        if(self.diskType_QCOW2.isEnabled() == True and self.diskType_RAW.isEnabled() == False and self.diskType_VHDX.isEnabled() == False):
+        
+        if self.diskType_QCOW2.isChecked():
             metadata['disk']['disk_type'] = 'qcow2'
-        elif(self.diskType_QCOW2.isEnabled() == False and self.diskType_RAW.isEnabled() == True and self.diskType_VHDX.isEnabled() == False):
+        elif self.diskType_RAW.isChecked():
             metadata['disk']['disk_type'] = 'raw' 
-        else:
-            metadata['disk']['disk_type'] = 'vhdx'   
+        elif self.diskType_VHDX.isChecked():
+            metadata['disk']['disk_type'] = 'vhdx'  
         if self.experimental_OpenGL_Accel.isChecked() == True:
             metadata['addition']['args'] = self.experimental_Input_StartupArg.text() + ' -hdb fat:rw:src/vm/drivers/' 
         if not os.path.exists(f'src/vm/{metadata['vm_name']}'):
@@ -288,7 +305,12 @@ class CreateVM(QWidget):
                     if(metadata['desc'] == ''):
                         metadata['desc'] = 'No Description Avaliable' 
                     if(metadata['disk']['disk_size'] == ''):
-                        metadata['disk']['disk_size'] = 'No Disk Avaliable'           
+                        metadata['disk']['disk_size'] = 'No Disk Avaliable'
+                    if(metadata['disk']['disk_type'] != 'raw' or metadata['disk']['disk_type'] != 'vhdx' and metadata['vm_type'] == 'win'):
+                        warnSlowPerform = QMessageBox.warning(self, '권고', 'Imaginary(이)가 가상머신이 윈도우인것을 감지하였습니다만,\n디스크 타입이 RAW또는 VHDX방식이 아닌것을 확인했습니다.\n\n해당 디스크 타입은 윈도우 가상 환경에서 "기본적으로" 권장되지 않으며\n이 디스크때문에 실제 성능에 관여를 할수 있습니다.\n\n사용자는 해당 사항을 확인하였으며, 이와같은 성능 저하의 가능성에 동의합니다.')
+                    if(metadata['vm_type'] == 'mac'):
+                        warnMacNoAccel = QMessageBox.warning(self, 'macOS 사용에 관해서', 'Imaginary(이)가 사용자가 macOS 관련된 시스템을 설치하는것을 발견했습니다.\nImaginary는 QEMU 가상환경을 사용하지만, 윈도우에서만 현재로선 지원하기 때문에\nmacOS와 관련된 가속화가 사용이 불가할수 있습니다.\n\n사용자는 해당 사항에 확인하였음을 동의합니다.')
+
                     json.dump(metadata, f, indent=3, sort_keys=True)
                     f.close()    
                     self.close()
@@ -344,12 +366,14 @@ class CreateVM(QWidget):
         self.label_VGAMemSize.setHidden(True)
         self.experimental_GPUType.setHidden(True)
         self.label_GPUType.setHidden(True)
+        self.experimental_isLegacy.setHidden(True)
         self.experimental_Input_StartupArg.setHidden(True)
         self.diskType_QCOW2.setHidden(True)
         self.diskType_VHDX.setHidden(True)
         self.diskType_RAW.setHidden(True)
         self.label_DiskType.setHidden(True)
         self.whybutdontcreatedisk.setHidden(True)
+        self.experimental_VMType.setHidden(True)
 
         self.label_Title.setText('General Setup')
         self.label_createVM.clicked.connect(self.frame3)
@@ -374,6 +398,7 @@ class CreateVM(QWidget):
         self.label_RamSize.setHidden(True)
         self.experimental_HAX_Accel.setHidden(False)
         self.Input_VGAMemSize.setHidden(False)
+        self.experimental_VMType.setHidden(False)
         self.Input_VGAMemSize.setHidden(False)
         self.label_VGAMemSize.setHidden(False)
         self.experimental_GPUType.setHidden(False)
@@ -382,6 +407,7 @@ class CreateVM(QWidget):
         self.whybutdontcreatedisk.setHidden(True)
         self.label_DiskType.setHidden(True)
         self.diskType_QCOW2.setHidden(True)
+        self.experimental_isLegacy.setHidden(True)
         self.diskType_RAW.setHidden(True)
         self.diskType_VHDX.setHidden(True)
         self.whybutdontcreatedisk.setHidden(True)
@@ -406,6 +432,9 @@ class CreateVM(QWidget):
         self.experimental_Input_StartupArg.move(20, 395)
         self.whybutdontcreatedisk.move(20, 417) 
         self.experimental_OpenGL_Accel.move(20, 190)
+        self.experimental_VMType.move(20, 385)
+
+        self.experimental_GPUType.resize(QSize(120, 30))
 
         self.label_createVM.clicked.connect(self.saveChange)
         self.label_createVM.setText("Create")
@@ -418,9 +447,11 @@ class CreateVM(QWidget):
         self.label_Title.setText('Disk Setup')
 
         self.label_InputLabel.setHidden(True)
+        self.experimental_isLegacy.setHidden(True)
         self.label_InputLabel_desc.setHidden(True)
         self.label_loadISO.setHidden(True)
         self.experimental_OpenGL_Accel.setHidden(True)
+        self.experimental_VMType.setHidden(True)
         self.label_SysCoreSize.setHidden(True)
         self.Input_SysCoreSize.setHidden(True)
         self.Input_VMDesc.setHidden(True)

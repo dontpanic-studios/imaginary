@@ -245,6 +245,13 @@ class EditVM(QWidget):
         self.experimental_GPUType.setCurrentText(self.data['vga']['type'])
         self.experimental_HAX_Accel.setChecked(self.data['isaccel']['bool'])
 
+        if(self.data['disk']['disk_type'] == 'raw'):
+            self.diskType_RAW.setEnabled(True)
+        elif(self.data['disk']['disk_type'] == 'qcow2'):
+            self.diskType_QCOW2.setEnabled(True)
+        else:
+            self.diskType_VHDX.setEnabled(True)
+
     def saveChange(self):
         metadata = {
             'metadata_ver': os.environ.get('Ver'),
@@ -285,12 +292,14 @@ class EditVM(QWidget):
         if metadata['vga']['type'] == 'virtio-gpu' and metadata['vga']['mem'] != '':
             msg = QMessageBox.critical(self, '그래픽 메모리 지원 안됨', '선택한 그래픽 세팅은 메모리 변경이 불가능한 세팅입니다,\n"qxl" 또는 "isa-vga" 로 바꿔주세요.')    
             return
-        if(self.diskType_QCOW2.isEnabled() == True and self.diskType_RAW.isEnabled() == False and self.diskType_VHDX.isEnabled() == False):
+        
+        if self.diskType_QCOW2.isChecked():
             metadata['disk']['disk_type'] = 'qcow2'
-        elif(self.diskType_QCOW2.isEnabled() == False and self.diskType_RAW.isEnabled() == True and self.diskType_VHDX.isEnabled() == False):
+        elif self.diskType_RAW.isChecked():
             metadata['disk']['disk_type'] = 'raw' 
-        else:
+        elif self.diskType_VHDX.isChecked():
             metadata['disk']['disk_type'] = 'vhdx'   
+
         if self.experimental_OpenGL_Accel.isChecked() == True:
             metadata['addition']['args'] = self.experimental_Input_StartupArg.text() + ' -hdb fat:rw:src/vm/drivers/' 
         if not os.path.exists(f'src/vm/{metadata['vm_name']}'):
