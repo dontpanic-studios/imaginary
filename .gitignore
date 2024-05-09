@@ -18,7 +18,7 @@ lib/
 lib64/
 parts/
 sdist/
-src/qemu
+src/qemu/
 log/
 var/
 wheels/
