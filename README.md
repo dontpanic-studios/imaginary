@@ -20,7 +20,7 @@
   
 ## 📜 Information about using this project
 - Imaginary Project is licensed under GPL-3.0 License, check [LICENSE](https://github.com/dontpanic-studios/imaginary/blob/main/LICENSE) for full information.
-- QEMU File is not included on Github Uploaded Source-Code, you have to copy full-release of QEMU Windows Installation in 'src/qemu' folder.
+- QEMU File does not included on the source file, you have to copy full installation of QEMU(>=9.0.0-rc2) to "src/qemu" directory.
 - Imaginary has Code of Conduct page! For more information please check [This](https://github.com/dontpanic-studios/imaginary?tab=coc-ov-file) tab.
 
 > *GUI Preview of Imaginary*
