@@ -18,6 +18,8 @@ lib/
 lib64/
 parts/
 sdist/
+src/qemu
+log/
 var/
 wheels/
 share/python-wheels/
@@ -35,6 +37,9 @@ MANIFEST
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
+
+# NSIS
+.nsis
 
 # Unit test / coverage reports
 htmlcov/
