@@ -1,0 +1,6 @@
+pyqt6
+requests
+python-dotenv
+fonttools
+psutil
+pypresence

@@ -2,8 +2,7 @@ from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QListView, QAbstractIt
 from PyQt6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
 from PyQt6 import QtCore
 from PyQt6.QtCore import QEvent, QMimeDatabase
-import os, sys, json, subprocess, requests, psutil, traceback, shutil, src.discord, shutil
-import src.discord.intergration
+import os, sys, json, subprocess, requests, psutil, traceback, shutil, shutil, platform
 from src.gui.createvm import createvm
 from datetime import date
 from src.gui.label import whynotclick
@@ -23,6 +22,9 @@ except FileNotFoundError:
     traceback.format_exception()
 
 githubLink = requests.get('https://api.github.com/repos/dontpanic-studios/imaginary/releases/latest')
+print(f'User Platform: {platform.system()}')
+usrPlatform = platform.system()
+
 print('Load ENV')
 try:
     load_dotenv('./data/setting.env')
@@ -41,7 +43,7 @@ class MyProxyStyle(QProxyStyle):
 
 class Main(QWidget):
     def __init__(self):
-        print(f'Imaginary {os.environ.get('Ver')}\nPyQt v{QtCore.qVersion()}')
+        print(f'Imaginary {VER}\nPyQt v{QtCore.qVersion()}')
         print('trying initallizing main frame..')
         try:
             super().__init__()
@@ -58,8 +60,13 @@ class Main(QWidget):
             print('initallized.')
         except Exception:
             print(f"ERROR Occurred!\nLog: \n{traceback.format_exc()}")
-            errInfoWinInit = QMessageBox(self, '오류가 발생하였습니다.', '프로그램 UI를 재설정하다가 알수 없는 오류를 마주했습니다.\n자세한 내용은 Show Details.. 를 확인하세요.')
+            errInfoWinInit = QMessageBox(self)
+            errInfoWinInit.setIcon(QMessageBox.Icon.Critical)
+            errInfoWinInit.setWindowTitle('실행 실패')
+            errInfoWinInit.setWindowIcon(QIcon('src/png/icons/remove128.png'))
+            errInfoWinInit.setText('Imaginary 실행에 실패하였습니다.\n\n실행 실패엔 다양한 오류가 있습니다만, 대중적으로는 권한이 부족하여 실행에 실패할수 있습니다.\n\n더 다양한 정보는 Show Details를 확인해주세요.')
             errInfoWinInit.setDetailedText(f'Imaginary가 실행에 실패하였습니다.\n아래엔 오류 내용입니다.\n{traceback.format_exc()}')
+            errInfoWinInit.exec()
             print('failed to intiallized window')
             return
 
@@ -204,8 +211,23 @@ class Main(QWidget):
             self.label_Vm_Title.setText(item.text())
             self.label_Vm_Title.adjustSize()
             #Presence.update(self, details=f'Looking up {item.text()}', large_image='star') # this mf doesn't work properly
-        except FileNotFoundError:
+        except (FileNotFoundError, SystemError, json.decoder.JSONDecodeError, PermissionError) as e:
             print('failed to read metadata, is file even?')    
+            failReadData = QMessageBox(self)
+            failReadData.setWindowTitle('읽기 실패')
+            failReadData.setIcon(QMessageBox.Icon.Critical)
+            failReadData.setWindowIcon(QIcon('src/png/icons/remove128.png'))
+            if e == json.decoder.JSONDecodeError:
+                failReadData.setText('가상머신 정보를 읽는데 실패하였습니다.\n\nJSON Decoding Error, 잘못된 Value 값을 가지고 있습니다.')
+            elif e == SystemError:
+                failReadData.setText('가상머신 정보를 읽는데 실패하였습니다.\n\nSystemError, 시스템 상으로 오류가 발생했습니다.')
+            elif e == PermissionError:
+                failReadData.setText('가상머신 정보를 읽는데 실패하였습니다.\n\nNo Permission, Imaginary가 데이터를 읽는데에 권한이 부족합니다.')
+            else:
+                failReadData.setText('가상머신 정보를 읽는데 실패하였습니다.\n\nFile Cannot be found, Imaginary가 파일을 찾을수 없습니다.')
+            failReadData.setDetailedText(f'{traceback.format_exc()}')
+            failReadData.exec()    
+            return
 
     def closeEvent(self, event):
         sys.exit(0)
@@ -240,28 +262,46 @@ class Main(QWidget):
         self.label_Vm_Desc.adjustSize()
 
     def reloadList(self):
-        # this shit is crazy! but why not?
-        self.model.clear()
-        self.sub_folders = [name for name in os.listdir('src/vm/') if os.path.isdir(os.path.join('src/vm/', name))]
-        for i in self.sub_folders:
-            if i != 'drivers':
-                f = open('./src/vm/' + i + '/metadata.json', 'r+')
-                data = json.load(f)
-                it = QStandardItem(i)
-                self.model.appendRow(it)
-                it.setData(QIcon(f'src/png/{data['vm_type']}.png'.format(i)), QtCore.Qt.ItemDataRole.DecorationRole)
-                self.vmListView.setModel(self.model)
-                if len(self.sub_folders) > 0:
-                    self.label_Vm_Title.setText('Select VM to get Started!')
-                    self.label_Vm_Desc.setText('or create another one')
-                    self.label_Vm_Title.adjustSize()
-                    self.label_Vm_Desc.adjustSize()
+        try:
+            # this shit is crazy! but why not?
+            self.model.clear()
+            self.sub_folders = [name for name in os.listdir('src/vm/') if os.path.isdir(os.path.join('src/vm/', name))]
+            for i in self.sub_folders:
+                if i != 'drivers':
+                    f = open('./src/vm/' + i + '/metadata.json', 'r+')
+                    data = json.load(f)
+                    it = QStandardItem(i)
+                    self.model.appendRow(it)
+                    it.setData(QIcon(f'src/png/{data['vm_type']}.png'.format(i)), QtCore.Qt.ItemDataRole.DecorationRole)
+                    self.vmListView.setModel(self.model)
+                    if len(self.sub_folders) > 0:
+                        self.label_Vm_Title.setText('Select VM to get Started!')
+                        self.label_Vm_Desc.setText('or create another one')
+                        self.label_Vm_Title.adjustSize()
+                        self.label_Vm_Desc.adjustSize()
+                    else:
+                        self.label_Vm_Desc.adjustSize()
+                        self.label_Vm_Title.adjustSize()
+                        print('No VM(s) has been found, ignoring it.')  
                 else:
-                    self.label_Vm_Desc.adjustSize()
-                    self.label_Vm_Title.adjustSize()
-                    print('No VM(s) has been found, ignoring it.')  
+                    print('driver folder found, ignoring.')
+        except (FileNotFoundError, SystemError, json.decoder.JSONDecodeError, PermissionError) as e:
+            print('failed to read metadata, is file even?')    
+            failReadData = QMessageBox(self)
+            failReadData.setWindowTitle('읽기 실패')
+            failReadData.setIcon(QMessageBox.Icon.Critical)
+            failReadData.setWindowIcon(QIcon('src/png/icons/remove128.png'))
+            if e == json.decoder.JSONDecodeError:
+                failReadData.setText('가상머신 정보를 읽는데 실패하였습니다,\n\n잘못된 Value 값을 가지고 있습니다.')
+            elif e == SystemError:
+                failReadData.setText('가상머신 정보를 읽는데 실패하였습니다,\n\n시스템 상으로 오류가 발생했습니다.')
+            elif e == PermissionError:
+                failReadData.setText('가상머신 정보를 읽는데 실패하였습니다,\n\nImaginary가 데이터를 읽는데에 권한이 부족합니다.')
             else:
-                print('driver folder found, ignoring.')        
+                failReadData.setText('가상머신 정보를 읽는데 실패하였습니다,\n\nImaginary가 파일을 찾을수 없습니다.')
+            failReadData.setDetailedText(f'{traceback.format_exc()}')
+            failReadData.exec()         
+            return
 
     def runQemu(self): # qemu run function
         print('Load Model')
