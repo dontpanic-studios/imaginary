@@ -17,13 +17,15 @@
   
 ## 🚩 Will be supported
 - Multiple Language Support (eg. en-US, ko-KR)
-  
+
+## ⚠ Warning!
+- From downloading source code directly from Github, QEMU File does not included on the source file. You have to copy full installation of QEMU(>=9.0.0-rc2) into "src/qemu" directory.
+- This project requires Python>=3.12.3, not older than 3.12 version.
+
 ## 📜 Information about using this project
-- Imaginary Project is licensed under GPL-3.0 License, check [LICENSE](https://github.com/dontpanic-studios/imaginary/blob/main/LICENSE) for full information.
-- QEMU File does not included on the source file, you have to copy full installation of QEMU(>=9.0.0-rc2) to "src/qemu" directory.
+- Imaginary Project is licensed under GPL-3.0 License, check [LICENSE](https://github.com/dontpanic-studios/imaginary/blob/main/LICENSE) for full information
 - Imaginary has Code of Conduct page! For more information please check [This](https://github.com/dontpanic-studios/imaginary?tab=coc-ov-file) tab.
 
 > *GUI Preview of Imaginary*
   
-![image](https://github.com/dontpanic-studios/imaginary/assets/89384053/83052549-1d92-45e3-8a05-b7f84e81b191)
-
+![image](https://github.com/dontpanic-studios/imaginary/assets/89384053/dd946ef7-9f54-4d22-9def-209c20204f7f)
