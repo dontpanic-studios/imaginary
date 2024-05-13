@@ -1,7 +1,8 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QCheckBox
-from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QLineEdit, QComboBox, QFileDialog
+from PyQt6.QtGui import QIcon
 from PyQt6 import QtCore
-import os, sys, logging
+from src.gui.label import whynotclick
+import os, sys, logging, subprocess, traceback
 from dotenv import load_dotenv
 
 log = logging
@@ -15,7 +16,7 @@ class DiskTool(QWidget):
             super().__init__()
 
             self.setWindowTitle("Imaginary - Disk Tool")
-            self.setStyleSheet("background-color: #262626;") 
+            self.setStyleSheet("background-color: #262626; Color : white;") 
             self.setWindowIcon(QIcon('./src/png/icons/128.png'))
             self.setFixedSize(640, 200)
             self.setWindowFlags(QtCore.Qt.WindowType.WindowCloseButtonHint | QtCore.Qt.WindowType.WindowMinimizeButtonHint)
@@ -29,30 +30,95 @@ class DiskTool(QWidget):
             log.critical('failed to intiallized window')
 
     def initUI(self):
-        self.label_Logo = QLabel(self)
+        diskType = ["qcow2", "raw", "vhdx"]
+
         self.label_InfoTitle = QLabel("Disk Tool", self)
+        self.label_DiskSize = QLabel("Disk Size", self)
+        self.label_DiskType = QLabel("Disk Type", self)
+        self.label_DiskName = QLabel("Disk Name", self)
+
+        self.createDisk = whynotclick.Label(self)
+        self.createDisk.setText("Create Disk")
+
+        self.Input_DiskSize = QLineEdit(self)
+        self.Input_DiskName = QLineEdit(self)
+
+        self.diskTypeList = QComboBox(self)
+        self.diskTypeList.addItems(diskType)
+
+        #self.createToAnotherLocation = QCheckBox(self, text="Create Disk to Another Location")
 
         font_bold_title = self.label_InfoTitle.font()
         font_bold_title.setBold(True)
         font_bold_title.setPointSize(30)
         font_bold_title.setFamily(os.environ.get('Font'))
 
-        self.font_bold = self.label_InfoTitle.font()
-        self.font_bold.setBold(True)
-        self.font_bold.setPointSize(20)
-        self.font_bold.setFamily(os.environ.get('Font'))
+        font_button = self.label_InfoTitle.font()
+        font_button.setBold(True)
+        font_button.setPointSize(15)
+        font_button.setFamily(os.environ.get('Font'))   
 
-        self.font_smol = self.label_InfoTitle.font()
-        self.font_smol.setBold(True)
-        self.font_smol.setPointSize(17)
-        self.font_smol.setFamily(os.environ.get('Font'))
+        self.label_InfoTitle.move(15, 15)
+        self.Input_DiskName.move(15, 100)
+        self.label_DiskName.move(15, 70)
+        self.label_DiskSize.move(350, 70)
+        self.Input_DiskSize.move(350, 100)
+        self.label_DiskType.move(15, 135)
+        self.diskTypeList.move(15, 163)
 
-        self.label_Logo.move(15, 15)
-        self.label_Logo.resize(64, 64)
-        self.label_InfoTitle.move(150, 15)
+        self.createDisk.move(510, 163)
+
+        self.Input_DiskSize.setPlaceholderText("16G")
+        self.Input_DiskName.setPlaceholderText("Windows11")
+
+        self.Input_DiskName.setToolTip("Disk image name must not include word '.', ',', '/', '\\'")
 
         self.label_InfoTitle.setFont(font_bold_title)
         self.label_InfoTitle.setStyleSheet("Color : white; background-color: #262626;")   
+        self.Input_DiskSize.setFont(font_button)
+        self.Input_DiskSize.setStyleSheet("Color : white; background-color: #262626;")
+        self.createDisk.setFont(font_button)
+        self.createDisk.setStyleSheet("Color : white; background-color: #262626;")
+        self.label_DiskSize.setFont(font_button)
+        self.label_DiskSize.setStyleSheet("Color : white; background-color: #262626;")
+        self.diskTypeList.setFont(font_button)
+        self.diskTypeList.setStyleSheet("Color : white; background-color: #262626;")
+        self.label_DiskType.setFont(font_button)
+        self.label_DiskType.setStyleSheet("Color : white; background-color: #262626;")
+        self.Input_DiskName.setFont(font_button)
+        self.Input_DiskName.setStyleSheet("Color : white; background-color: #262626;")
+        self.label_DiskName.setFont(font_button)
+        self.label_DiskName.setStyleSheet("Color : white; background-color: #262626;")
 
-        self.label_Logo.adjustSize()
         self.label_InfoTitle.adjustSize()
+
+        self.createDisk.clicked.connect(self.generateDisk)
+
+    def generateDisk(self):
+        fname = QFileDialog.getExistingDirectoryUrl(self)        
+        diskLoc = ""
+
+        if fname.toString():
+            if(fname.toString() != ''):
+                    diskLoc = fname.toString()
+        else:
+            msg = QMessageBox.question(self, '의문문', '디스크 생성을 취소할까요?', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+
+            if(msg == QMessageBox.StandardButton.Yes):
+                return
+            else:
+                self.generateDisk()
+
+        try:
+            process = subprocess.check_call(f'cd src/qemu & qemu-img create -f {self.diskTypeList.currentText()} -o size={self.Input_DiskSize.text()} "{self.Input_DiskName.text()}.img" & qemu-img info "{self.Input_DiskName.text()}.img"', shell=True)
+            os.rename(f'src/qemu/{self.Input_DiskName.text()}.img', diskLoc)
+            
+            msg = QMessageBox.information(self, '디스크 생성됨', f'디스크가 "{diskLoc}" 에 생성되었습니다.')
+        except:
+            msg = QMessageBox(self)
+            msg.setWindowTitle('생성 실패')
+            msg.setIcon(QMessageBox.Icon.Critical)
+            msg.setWindowIcon(QIcon('src/png/icons/remove128.png'))
+            msg.setText('사용자가 지정한 디스크를 생성하는데에 실패하였습니다.\n모든 값이 올바른지 (예를 들어서 디스크 크기가 알맞지 않다던지) 확인하여 다시 생성해주세요.\n\n이와 관련되지 않는 오류는 Show Details를 확인해주세요.')
+            msg.setDetailedText(f'{traceback.format_exc()}')
+            msg.exec()

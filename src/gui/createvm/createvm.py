@@ -273,6 +273,13 @@ class CreateVM(QWidget):
             msg = QMessageBox.critical(self, '그래픽 메모리 지원 안됨', '선택한 그래픽 세팅은 메모리 변경이 불가능한 세팅입니다,\n"qxl" 또는 "isa-vga" 로 바꿔주세요.')    
             return
         
+        if metadata['max_core'].isnumeric() != True:
+            msg = QMessageBox.critical(self, '잘못된 설정 확인', 'Max Core (은)는 무조건 숫자형식이여야 합니다.')    
+            return
+        if metadata['vga']['type'] != 'virtio-gpu' and metadata['vga']['mem'].isnumeric() != True:
+            msg = QMessageBox.critical(self, '잘못된 설정 확인', 'GPU Memory (Mb) (은)는 무조건 숫자형식이여야 합니다.')    
+            return
+        
         if self.diskType_QCOW2.isChecked():
             metadata['disk']['disk_type'] = 'qcow2'
         elif self.diskType_RAW.isChecked():
