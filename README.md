@@ -7,6 +7,8 @@
 	<a href="https://github.com/dontpanic-studios/imaginary/releases/latest"><img src="https://img.shields.io/github/v/release/dontpanic-studios/imaginary?label=latest&style=for-the-badge&"></a>
 	<a href="https://github.com/dontpanic-studios/imaginary/releases"><img src="https://img.shields.io/github/downloads/dontpanic-studios/imaginary/latest/imaginary-setup.exe?style=for-the-badge&"></a>
 	<a href="https://github.com/dontpanic-studios/imaginary/graphs/contributors"><img src="https://img.shields.io/github/contributors/dontpanic-studios/imaginary?style=for-the-badge&"></a>
+	<a href="https://github.com/dontpanic-studios/imaginary/blob/main/github-resource/README_KR.md">[KR]</a>
+	<a href="https://github.com/dontpanic-studios/imaginary/blob/main/README.md">[EN]</a>
 </p>  
 
 ## 👀 Features
