@@ -5,6 +5,7 @@ from PyQt6.QtCore import QEvent, QMimeDatabase
 import os, sys, json, subprocess, requests, psutil, traceback, shutil, shutil, platform
 from src.gui.createvm import createvm
 from datetime import date
+from src.language.lang import Language, LanguageList
 from src.gui.label import whynotclick
 from src.discord.intergration import Presence
 from src.gui.setting import info
@@ -29,6 +30,8 @@ print('Load ENV')
 try:
     load_dotenv('./data/setting.env')
     VER = os.environ.get('Ver')
+    LANG = os.environ.get('Language')
+    print('Current Language: ' + LANG)
 except FileNotFoundError:
     print('Setting ENV File cannot be found!')
 
@@ -58,14 +61,17 @@ class Main(QWidget):
             self.setupWidget()
         
             print('initallized.')
-        except Exception:
+        except (Exception, TypeError) as e:
             print(f"ERROR Occurred!\nLog: \n{traceback.format_exc()}")
             errInfoWinInit = QMessageBox(self)
             errInfoWinInit.setIcon(QMessageBox.Icon.Critical)
             errInfoWinInit.setWindowTitle('실행 실패')
             errInfoWinInit.setWindowIcon(QIcon('src/png/icons/remove128.png'))
             errInfoWinInit.setText('Imaginary 실행에 실패하였습니다.\n\n실행 실패엔 다양한 오류가 있습니다만, 대중적으로는 권한이 부족하여 실행에 실패할수 있습니다.\n\n더 다양한 정보는 Show Details를 확인해주세요.')
-            errInfoWinInit.setDetailedText(f'Imaginary가 실행에 실패하였습니다.\n아래엔 오류 내용입니다.\n{traceback.format_exc()}')
+            if (e == Exception):
+                errInfoWinInit.setDetailedText(f'Imaginary가 실행에 실패하였습니다.\n아래엔 오류 내용입니다.\n{traceback.format_exc()}')
+            else:
+                errInfoWinInit.setDetailedText(f'Imaginary가 실행에 실패하였습니다.\nJSON UTF-8 파씽에 실패하였습니다, 아래는 오류 내용입니다.\n{traceback.format_exc()}')
             errInfoWinInit.exec()
             print('failed to intiallized window')
             return
@@ -76,27 +82,27 @@ class Main(QWidget):
         self.vm_background = QLabel(self)
         self.label_Title = whynotclick.Label(self)
         self.label_Title.setText("🌠 Imaginary")
-        self.label_Vm_Title = QLabel("No VM has been found!", self)
-        self.label_Vm_Desc = QLabel("Why don't you make one?", self)
-        self.label_Vm_Status = QLabel("Status: No VM status available.", self)
-        self.label_VMInfo = QLabel('No Metadata has been found.', self)
+        self.label_Vm_Title = QLabel(Language.getLanguageByEnum(LanguageList.NO_VM_AVALIABLE), self)
+        self.label_Vm_Desc = QLabel(Language.getLanguageByEnum(LanguageList.NO_VM_AVALIABLE_DESC), self)
+        self.label_Vm_Status = QLabel(Language.getLanguageByEnum(LanguageList.MAIN_STATUS_NULL), self)
+        self.label_VMInfo = QLabel(Language.getLanguageByEnum(LanguageList.NO_METADATA_FOUND), self)
 
         # image
         self.vm_background.setPixmap(QPixmap('src/png/background/bg1.png'))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
 
         # button
         self.createVM = whynotclick.Label(self)
-        self.createVM.setText('Create VM')
+        self.createVM.setText(Language.getLanguageByEnum(LanguageList.CREATE_VM))
         self.imaginarySetting = whynotclick.Label(self)
-        self.imaginarySetting.setText('Force Reload VM List')
+        self.imaginarySetting.setText(Language.getLanguageByEnum(LanguageList.FORCE_RELOAD_LIST))
         self.setting = whynotclick.Label(self)
-        self.setting.setText('Info')
+        self.setting.setText(Language.getLanguageByEnum(LanguageList.IMAGINARY_INFO))
         self.runVM = whynotclick.Label(self)
-        self.runVM.setText('Start VM')
+        self.runVM.setText(Language.getLanguageByEnum(LanguageList.MAIN_VMSTART))
         self.editVM = whynotclick.Label(self)
-        self.editVM.setText('Edit VM')
+        self.editVM.setText(Language.getLanguageByEnum(LanguageList.MAIN_VMEDIT))
         self.diskTool = whynotclick.Label(self)
-        self.diskTool.setText('Disk Tool')
+        self.diskTool.setText(Language.getLanguageByEnum(LanguageList.DISK_TOOL))
 
         # vm list
         self.vmListView = QListView(self)
@@ -173,28 +179,31 @@ class Main(QWidget):
                 f = open('./src/vm/' + item.text() + '/metadata.json', 'r+')
                 data = json.load(f)
                 print(f'Got package, header: \n{data}')
-                for i in data['desc']:
-                    self.label_Vm_Desc.setText(data['desc'])
-                f.close()
+                if data['desc'] != '':
+                    for i in data['desc']:
+                        self.label_Vm_Desc.setText(data['desc'])
+                    f.close()
+                    desc = data['desc']
+                else:
+                    desc = Language.getLanguageByEnum(LanguageList.NO_DESCRIPTION_FOUND) 
                 args = data['addition']['args']
-                desc = data['desc']
 
                 if(len(str(args)) >= 15):
                     args = f'{args[0:10]}.. ({len(str(args[10:]))} char left)'
                 elif(len(str(args)) <= 0):
-                    args = 'No Arguments Found.'
+                    args = Language.getLanguageByEnum(LanguageList.NO_ARGUMENTS_FOUND)
 
-                if(len(str(desc)) >= 15):
-                    self.label_Vm_Desc.setText(f'{desc[0:10]}.. ({len(str(desc[10:]))} char left)')
+                if(len(str(desc)) >= 25):
+                    self.label_Vm_Desc.setText(f'{desc[0:20]}.. ({len(str(desc[20:]))} char left)')
                     self.label_Vm_Desc.setToolTip(data['desc'])
                 elif(len(str(args)) <= 0):
-                    self.label_Vm_Desc.setText('No Description Found.')   
+                    self.label_Vm_Desc.setText(Language.getLanguageByEnum(LanguageList.NO_DESCRIPTION_FOUND))   
                 self.label_VMInfo.setText(f'Metadata Ver  |  {data['metadata_ver']}\nMax Core  |  {data['max_core']}\nMax Ram  |  {data['max_mem']}\nDisk Size  |  {data['disk']['disk_size']}\nIs Experimental On  |  {data['isaccel']['bool']}\nAccelerator Type  |  {data['isaccel']['acceltype']}\nV-GPU Type  |  {data['vga']['type']}\nAdditional Config  |  {args}')
-            except:
+            except (FileNotFoundError, SystemError, json.decoder.JSONDecodeError, PermissionError) as e:
                 print('Failed to load VM metadata!, is file even?')
                 print(traceback.format_exc())
-                self.label_VMInfo.setText('No Metadata has been found.')
-                self.label_VMInfo.adjustSize()  
+                self.label_VMInfo.setText(Language.getLanguageByEnum(LanguageList.NO_METADATA_FOUND))
+                self.label_VMInfo.adjustSize()
 
             if(data['disk']['disk_size'] != 'No Disk Avaliable'):
                 self.runVM.clicked.connect(self.runQemu)
@@ -275,8 +284,8 @@ class Main(QWidget):
                     it.setData(QIcon(f'src/png/{data['vm_type']}.png'.format(i)), QtCore.Qt.ItemDataRole.DecorationRole)
                     self.vmListView.setModel(self.model)
                     if len(self.sub_folders) > 0:
-                        self.label_Vm_Title.setText('Select VM to get Started!')
-                        self.label_Vm_Desc.setText('or create another one')
+                        self.label_Vm_Title.setText(Language.getLanguageByEnum(LanguageList.SELECT_VM))
+                        self.label_Vm_Desc.setText(Language.getLanguageByEnum(LanguageList.DUMMY))
                         self.label_Vm_Title.adjustSize()
                         self.label_Vm_Desc.adjustSize()
                     else:
@@ -346,6 +355,7 @@ class Main(QWidget):
 
     def checkUpdate(self):
             print('Checking update')
+            print(githubLink)
             githubLatestVer = githubLink.json()["name"]
             githubLastestDownload = githubLink.json()['assets']
             print(githubLastestDownload)
