@@ -5,6 +5,8 @@ from PyQt6.QtCore import QSize
 from src.gui.label import whynotclick
 import os, sys, logging, json, subprocess, traceback
 from dotenv import load_dotenv
+from src.language.lang import LanguageList
+from src.language.lang import Language
 from difflib import SequenceMatcher
 
 log = logging
@@ -39,7 +41,7 @@ class CreateVM(QWidget):
         self.experimental_GPUType_List = ['virtio-gpu', 'qxl', 'isa-vga', 'vmware-svga', 'none', 'virtio-gpu-gl']
         self.experimental_VMType_List = ['x86_64', 'arm', 'aarch64', 'i386', 'ppc', 'riscv32', 'riscv64', 'ppc64']
 
-        self.label_Title = QLabel('Setup your VM', self)
+        self.label_Title = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_1_TITLE), self)
         self.label_InputLabel = QLabel('VM Name', self)
         self.label_InputLabel_disk = QLabel('Disk Size', self)
         self.label_InputLabel_desc = QLabel('VM Description', self)
@@ -382,13 +384,40 @@ class CreateVM(QWidget):
         self.whybutdontcreatedisk.setHidden(True)
         self.experimental_VMType.setHidden(True)
 
+        self.label_createVM.adjustSize()
+        self.label_InputLabel.adjustSize()
+        self.label_Title.adjustSize()
+        self.label_InputLabel_desc.adjustSize()
+        self.label_loadISO.adjustSize()
+        self.Input_VMDesc.adjustSize()
+        self.Input_VMName.adjustSize()
+        self.label_loadISO_title.adjustSize()
+        self.label_InputLabel_disk.adjustSize()
+        self.Input_DiskSize.adjustSize()
+        self.experimental_OpenGL_Accel.adjustSize()
+        self.Input_RamSize.adjustSize()
+        self.label_RamSize.adjustSize()
+        self.experimental_HAX_Accel.adjustSize()
+        self.Input_VGAMemSize.adjustSize()
+        self.Input_VGAMemSize.adjustSize()
+        self.label_VGAMemSize.adjustSize()
+        self.experimental_GPUType.adjustSize()
+        self.label_GPUType.adjustSize()
+        self.experimental_Input_StartupArg.adjustSize()
+        self.whybutdontcreatedisk.adjustSize()
+        self.label_turnFrameBack.adjustSize()
+        self.Input_SysCoreSize.adjustSize()
+        self.label_SysCoreSize.adjustSize()
+        self.experimental_isLegacy.adjustSize()
+        self.experimental_VMType.adjustSize()
+
         self.label_Title.setText('General Setup')
         self.label_createVM.clicked.connect(self.frame3)
         self.label_createVM.setText('Next')
 
     def frame2(self): # etc type
         print("Frame1 Off, Frame 2 On")
-        self.label_Title.setText('Others')
+        self.label_Title.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_3_TITLE))
 
         self.label_InputLabel.setHidden(True)
         self.Input_SysCoreSize.setHidden(True)
@@ -418,6 +447,33 @@ class CreateVM(QWidget):
         self.diskType_RAW.setHidden(True)
         self.diskType_VHDX.setHidden(True)
         self.whybutdontcreatedisk.setHidden(True)
+        
+        self.label_createVM.adjustSize()
+        self.label_InputLabel.adjustSize()
+        self.label_Title.adjustSize()
+        self.label_InputLabel_desc.adjustSize()
+        self.label_loadISO.adjustSize()
+        self.Input_VMDesc.adjustSize()
+        self.Input_VMName.adjustSize()
+        self.label_loadISO_title.adjustSize()
+        self.label_InputLabel_disk.adjustSize()
+        self.Input_DiskSize.adjustSize()
+        self.experimental_OpenGL_Accel.adjustSize()
+        self.Input_RamSize.adjustSize()
+        self.label_RamSize.adjustSize()
+        self.experimental_HAX_Accel.adjustSize()
+        self.Input_VGAMemSize.adjustSize()
+        self.Input_VGAMemSize.adjustSize()
+        self.label_VGAMemSize.adjustSize()
+        self.experimental_GPUType.adjustSize()
+        self.label_GPUType.adjustSize()
+        self.experimental_Input_StartupArg.adjustSize()
+        self.whybutdontcreatedisk.adjustSize()
+        self.label_turnFrameBack.adjustSize()
+        self.Input_SysCoreSize.adjustSize()
+        self.label_SysCoreSize.adjustSize()
+        self.experimental_isLegacy.adjustSize()
+        self.experimental_VMType.adjustSize()
 
         self.label_Title.move(20, 15)
         self.label_InputLabel.move(20, 80)
@@ -451,7 +507,7 @@ class CreateVM(QWidget):
 
     def frame3(self): # disk
         print("Frame2 Off, Frame 3 On")
-        self.label_Title.setText('Disk Setup')
+        self.label_Title.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_2_TITLE))
 
         self.label_InputLabel.setHidden(True)
         self.experimental_isLegacy.setHidden(True)
@@ -482,6 +538,33 @@ class CreateVM(QWidget):
         self.diskType_RAW.setHidden(False)
         self.diskType_VHDX.setHidden(False)
         self.label_DiskType.setHidden(False)
+
+        self.label_createVM.adjustSize()
+        self.label_InputLabel.adjustSize()
+        self.label_Title.adjustSize()
+        self.label_InputLabel_desc.adjustSize()
+        self.label_loadISO.adjustSize()
+        self.Input_VMDesc.adjustSize()
+        self.Input_VMName.adjustSize()
+        self.label_loadISO_title.adjustSize()
+        self.label_InputLabel_disk.adjustSize()
+        self.Input_DiskSize.adjustSize()
+        self.experimental_OpenGL_Accel.adjustSize()
+        self.Input_RamSize.adjustSize()
+        self.label_RamSize.adjustSize()
+        self.experimental_HAX_Accel.adjustSize()
+        self.Input_VGAMemSize.adjustSize()
+        self.Input_VGAMemSize.adjustSize()
+        self.label_VGAMemSize.adjustSize()
+        self.experimental_GPUType.adjustSize()
+        self.label_GPUType.adjustSize()
+        self.experimental_Input_StartupArg.adjustSize()
+        self.whybutdontcreatedisk.adjustSize()
+        self.label_turnFrameBack.adjustSize()
+        self.Input_SysCoreSize.adjustSize()
+        self.label_SysCoreSize.adjustSize()
+        self.experimental_isLegacy.adjustSize()
+        self.experimental_VMType.adjustSize()
 
         self.diskType_RAW.move(20, 120)
         self.diskType_QCOW2.move(20, 145)

@@ -1,12 +1,13 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QCheckBox
+from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QComboBox
 from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6 import QtCore
-import os, sys, logging
+import os, sys, logging, dotenv, traceback
 from dotenv import load_dotenv
 
 log = logging
 logFilePath = './log/debug-log.log'
 load_dotenv('./data/setting.env')
+file = dotenv.find_dotenv('data/setting.env')
 
 class CreateVM(QWidget):
     def __init__(self):
@@ -15,7 +16,7 @@ class CreateVM(QWidget):
             super().__init__()
 
             self.setWindowTitle("Info")
-            self.setStyleSheet("background-color: #262626;") 
+            self.setStyleSheet("background-color: #262626; Color: white;") 
             self.setWindowIcon(QIcon('./src/png/icons/128.png'))
             self.setFixedSize(640, 200)
             self.setWindowFlags(QtCore.Qt.WindowType.WindowCloseButtonHint | QtCore.Qt.WindowType.WindowMinimizeButtonHint)
@@ -34,8 +35,8 @@ class CreateVM(QWidget):
         self.label_Version = QLabel(f"{os.environ.get('Ver')}\nOpen-source QEMU GUI Tool", self)
         self.label_Logo.setPixmap(QPixmap('./src/png/icons/128.png')) 
 
-        self.enableLabSetting = QCheckBox(self)
-        self.enableLabSetting.setText('Enable Lab Settings')
+        self.enableLabSetting = QComboBox(self)
+        self.enableLabSetting.addItems(['en_US', 'ko_KR'])
 
         font_bold_title = self.label_InfoTitle.font()
         font_bold_title.setBold(True)
@@ -68,12 +69,28 @@ class CreateVM(QWidget):
         self.label_Logo.adjustSize()
         self.label_InfoTitle.adjustSize()
         self.label_Version.adjustSize()
-        self.enableLabSetting.adjustSize()
 
-        if os.environ.get('isLabEnable') == 'True':
-            self.enableLabSetting.setChecked(True)
+        self.enableLabSetting.setCurrentText(os.environ.get("Language"))
+
+    def closeEvent(self, event):
+        if os.environ.get("Language") != self.enableLabSetting.currentText():
+            try:
+                dotenv.set_key(file, "Language", self.enableLabSetting.currentText())
+                inf = QMessageBox.information(self, "언어 저장됨", "프로그램을 재시작하여 언어 변경을 완료하세요.")
+            except (FileNotFoundError, SystemError,  PermissionError) as e:
+                print('failed to read metadata, is file even?')    
+                failReadData = QMessageBox(self)
+                failReadData.setWindowTitle('데이터 저장 실패')
+                failReadData.setIcon(QMessageBox.Icon.Critical)
+                failReadData.setWindowIcon(QIcon('src/png/icons/remove128.png'))
+                if e == SystemError:
+                    failReadData.setText('가상머신 정보를 읽는데 실패하였습니다.\n\nSystemError, 시스템 상으로 오류가 발생했습니다.')
+                elif e == PermissionError:
+                    failReadData.setText('가상머신 정보를 읽는데 실패하였습니다.\n\nNo Permission, Imaginary가 데이터를 쓰는데 권한이 부족합니다.')
+                else:
+                    failReadData.setText('가상머신 정보를 읽는데 실패하였습니다.\n\nFile Cannot be found, Imaginary가 파일을 찾을수 없습니다.')
+                failReadData.setDetailedText(f'{traceback.format_exc()}')
+                failReadData.exec()    
+                return
         else:
-            self.enableLabSetting.setChecked(False)    
-
-    #def closeEvent(self, event):
-    #    os.environ.update('isLabEnable', kwargs=self.enableLabSetting.isChecked)   
+            print("No Data has been changed.")
