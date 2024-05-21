@@ -14,10 +14,13 @@ from src.gui.disktool import disk
 from dotenv import load_dotenv
 from pathlib import Path
 from fontTools.ttLib import TTFont
+import qdarktheme
+
+
 
 print('Installing Figtree Font.')
 try:
-    font = TTFont('src\\font\\figtree.ttf')
+    font = TTFont('src\\font\\wanted.ttf')
 except FileNotFoundError:
     print('Font File cannot be found!')
     traceback.format_exception()
@@ -64,15 +67,9 @@ class Main(QWidget):
         except (Exception, TypeError) as e:
             print(f"ERROR Occurred!\nLog: \n{traceback.format_exc()}")
             errInfoWinInit = QMessageBox(self)
-            errInfoWinInit.setIcon(QMessageBox.Icon.Critical)
-            errInfoWinInit.setWindowTitle('실행 실패')
-            errInfoWinInit.setWindowIcon(QIcon('src/png/icons/remove128.png'))
-            errInfoWinInit.setText('Imaginary 실행에 실패하였습니다.\n\n실행 실패엔 다양한 오류가 있습니다만, 대중적으로는 권한이 부족하여 실행에 실패할수 있습니다.\n\n더 다양한 정보는 Show Details를 확인해주세요.')
-            if (e == Exception):
-                errInfoWinInit.setDetailedText(f'Imaginary가 실행에 실패하였습니다.\n아래엔 오류 내용입니다.\n{traceback.format_exc()}')
-            else:
-                errInfoWinInit.setDetailedText(f'Imaginary가 실행에 실패하였습니다.\nJSON UTF-8 파씽에 실패하였습니다, 아래는 오류 내용입니다.\n{traceback.format_exc()}')
-            errInfoWinInit.exec()
+            errInfoWinInit.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_VAR_TITLE))
+            errInfoWinInit.setText(Language.getLanguageByEnum(LanguageList.MSG_VAR_DESC))
+            errInfoWinInit.setDetailedText(traceback.format_exc())
             print('failed to intiallized window')
             return
 
@@ -154,6 +151,7 @@ class Main(QWidget):
 
         self.vmListView.installEventFilter(self)
         self.setLabelFont()
+        self.setKRLocation()
 
     def showCreateVMWindow(self):
         print("Opening CreateVM...")
@@ -223,19 +221,19 @@ class Main(QWidget):
         except (FileNotFoundError, SystemError, json.decoder.JSONDecodeError, PermissionError) as e:
             print('failed to read metadata, is file even?')    
             failReadData = QMessageBox(self)
-            failReadData.setWindowTitle('읽기 실패')
+            failReadData.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_TITLE))
             failReadData.setIcon(QMessageBox.Icon.Critical)
             failReadData.setWindowIcon(QIcon('src/png/icons/remove128.png'))
             if e == json.decoder.JSONDecodeError:
-                failReadData.setText('가상머신 정보를 읽는데 실패하였습니다.\n\nJSON Decoding Error, 잘못된 Value 값을 가지고 있습니다.')
+                failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_JSON))
             elif e == SystemError:
-                failReadData.setText('가상머신 정보를 읽는데 실패하였습니다.\n\nSystemError, 시스템 상으로 오류가 발생했습니다.')
+                failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_SYSTEM))
             elif e == PermissionError:
-                failReadData.setText('가상머신 정보를 읽는데 실패하였습니다.\n\nNo Permission, Imaginary가 데이터를 읽는데에 권한이 부족합니다.')
+                failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_PERMISSION))
             else:
-                failReadData.setText('가상머신 정보를 읽는데 실패하였습니다.\n\nFile Cannot be found, Imaginary가 파일을 찾을수 없습니다.')
+                failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_NOFILEFOUND))
             failReadData.setDetailedText(f'{traceback.format_exc()}')
-            failReadData.exec()    
+            failReadData.exec()         
             return
 
     def closeEvent(self, event):
@@ -297,17 +295,17 @@ class Main(QWidget):
         except (FileNotFoundError, SystemError, json.decoder.JSONDecodeError, PermissionError) as e:
             print('failed to read metadata, is file even?')    
             failReadData = QMessageBox(self)
-            failReadData.setWindowTitle('읽기 실패')
+            failReadData.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_TITLE))
             failReadData.setIcon(QMessageBox.Icon.Critical)
             failReadData.setWindowIcon(QIcon('src/png/icons/remove128.png'))
             if e == json.decoder.JSONDecodeError:
-                failReadData.setText('가상머신 정보를 읽는데 실패하였습니다,\n\n잘못된 Value 값을 가지고 있습니다.')
+                failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_JSON))
             elif e == SystemError:
-                failReadData.setText('가상머신 정보를 읽는데 실패하였습니다,\n\n시스템 상으로 오류가 발생했습니다.')
+                failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_SYSTEM))
             elif e == PermissionError:
-                failReadData.setText('가상머신 정보를 읽는데 실패하였습니다,\n\nImaginary가 데이터를 읽는데에 권한이 부족합니다.')
+                failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_PERMISSION))
             else:
-                failReadData.setText('가상머신 정보를 읽는데 실패하였습니다,\n\nImaginary가 파일을 찾을수 없습니다.')
+                failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_NOFILEFOUND))
             failReadData.setDetailedText(f'{traceback.format_exc()}')
             failReadData.exec()         
             return
@@ -368,8 +366,8 @@ class Main(QWidget):
                 findUpdateMsg = QMessageBox(self)
                 findUpdateMsg.setIcon(QMessageBox.Icon.Question)
                 findUpdateMsg.setWindowIcon(QIcon('src/png/icons/128.png'))
-                findUpdateMsg.setWindowTitle('업데이트 발견')
-                findUpdateMsg.setText(f'새로운 버전 {githubLatestVer} 이(가) 발견되었습니다,\nShow Details... 를 눌러 자세한 업데이트 내용을 확인할수 있습니다..')
+                findUpdateMsg.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_UPDATE_FOUND_TITLE))
+                findUpdateMsg.setText(Language.getLanguageByEnum(LanguageList.MSG_UPDATE_FOUND_DESC) + githubLatestVer + Language.getLanguageByEnum(LanguageList.MSG_UPDATE_FOUND_DESC_2))
                 findUpdateMsg.setDetailedText(githubLink.json()['body'])
                 findUpdateMsg.exec()
             elif(githubLatestVer < VER):
@@ -377,7 +375,7 @@ class Main(QWidget):
                 usingDebugVer = QMessageBox(self)
                 usingDebugVer.setIcon(QMessageBox.Icon.Warning)
                 usingDebugVer.setWindowIcon(QIcon('src/png/icons/128.png'))
-                usingDebugVer.setWindowTitle('개발 버전 사용중')
+                usingDebugVer.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_UPDATE_DEV_VERSION_TITLE))
                 usingDebugVer.setText(f'현재 {githubLatestVer} 버전보다 더 높은 버전 {VER} 을 사용하고 있습니다.\n이 버전은 매우 불안정하며, 버그가 자주 발생합니다.')
                 usingDebugVer.exec()
             elif(githubLatestVer == VER):
@@ -482,12 +480,21 @@ class Main(QWidget):
             mimetype = db.mimeTypeForUrl(url)
             if mimetype.name() == "application/zip":
                 urls.append(url)
+            else:
+                fileNotCompatible = QMessageBox.warning(self, Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_TITLE), Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_INCOMPATIBLE))
         return urls  
 
     def showDiskToolWindow(self):
         print("Opening DisktoolWin...")
         self.w = disk.DiskTool()
         self.w.show()      
+
+    def setKRLocation(self):
+        if LANG == 'ko_KR':
+            self.editVM.move(465, 205)
+            self.imaginarySetting.move(480, 15)
+        else:
+            print('Dont Change Location, ENUS Detected.')    
 
 if __name__ == '__main__':
     Presence.connect()

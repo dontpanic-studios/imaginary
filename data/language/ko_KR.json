@@ -1,4 +1,5 @@
 {
+    "langName": "ko_KR",
     "NO_ARGUMENTS_FOUND": "시작 옵션 존재하지 않음.",
     "NO_DESCRIPTION_FOUND": "가상머신 설명을 찾을수 없음.",
     "NO_METADATA_FOUND": "가상머신 정보를 찾을수 없음.",
@@ -6,19 +7,21 @@
     "NO_VM_AVALIABLE_DESC": "새로 하나 만드는건 어떤가요?",
     "DUMMY": "더미 텍스트, 이 텍스트를 릴리즈하기전에 바꾸십시오.",
     "SELECT_VM": "가상머신 선택하기",
-    "CREATE_VM": "생성하기",
+    "CREATE_VM": "가상머신 생성하기",
     "IMAGINARY_INFO": "정보",
     "DISK_TOOL": "디스크 도구",
-    "FORCE_RELOAD_LIST": "리스트 강제 로드",
+    "FORCE_RELOAD_LIST": "리스트 다시 불러오기",
 
     "MAIN_STATUS_NULL": "아무런 상태를 찾을수 없어요.",
     "MAIN_STATUS_RUNNING": "열심히 돌리는중..",
-    "MAIN_VMSTART": "시작",
+    "MAIN_VMSTART": "가상머신 시작",
     "MAIN_VMEDIT": "가상머신 수정",
 
     "CREATEVM_1_TITLE": "가상머신 생성",
     "CREATEVM_2_TITLE": "디스크 생성",
     "CREATEVM_3_TITLE": "기타 설정",
+    "CREATEVM_LABEL_VMNAME": "가상머신 이름",
+    "CREATEVM_LABEL_VMDESC": "가상머신 설명",
     "CREATEVM_TITLE_LOADISO": "ISO 위치",
     "CREATEVM_LABEL_LOADISO": "ISO 불러오기..",
     "CREATEVM_DISKTYPE_RAW": "RAW : 용량이 크지만 가장 빠른 디스크 타입입니다.",
@@ -32,6 +35,16 @@
     "CREATEVM_LABEL_CPU": "가상 CPU 코어 설정",
     "CREATEVM_LABEL_GPU_VRAM": "가상 GPU 메모리 설정 (Mb)",
     "CREATEVM_LABEL_GPU_LIST": "가상 GPU 선택",
+    "CREATEVM_LABEL_DISK_SIZE": "디스크 크기",
+    "CREATEVM_NEXT": "다음",
+    "CREATEVM_SAVE": "저장",
+    "CREATEVM_BACK": "이전",
+
+    "EDITVM_TITLE": " 수정하기",
+
+    "MSG_VAR_TITLE": "알수없는 오류 발생",
+    "MSG_VAR_DESC": "Imaginary가 알수없는 오류가 부딛쳤습니다,\n\n이러한 오류가 발생하는 경우는 Imaginary가 있는 위치의 폴더 이름이 알수없는 UTF-8 포맷으로 되어있거나,\n아니면 심각한 오류가 발생했을때 발생합니다.\n\nShow Details.. 를 보아 자세한 정보를 확인하세요.",
+
     "MSG_CREATEVM_TITLE_TCG_ON": "실험적 기능 켜짐",
     "MSG_CREATEVM_DESC_TCG_ON": "경고!\n\n하드웨어 가상화가 켜져있습니다!\n해당 기능은 특정 기기에서 작동이 안될수 있습니다!",
     "MSG_CREATEVM_TITLE_WINDOWS_WARN": "권고",
@@ -40,6 +53,25 @@
     "MSG_CREATEVM_DESC_MACOS_WARN": "Imaginary(이)가 사용자가 macOS 관련된 시스템을 설치하는것을 발견했습니다.\nImaginary는 QEMU 가상환경을 사용하지만, 윈도우에서만 현재로선 지원하기 때문에\nmacOS와 관련된 가속화가 사용이 불가할수 있습니다.\n\n사용자는 해당 사항에 확인하였음을 동의합니다",
     "MSG_CREATEVM_TITLE_EXIST": "가상머신 존재",
     "MSG_CREATEVM_DESC_EXIST": "생성할려는 가상머신은 이미 존재합니다",
+
+    "MSG_MAIN_METADATA_FAILED_TITLE": "읽기 실패",
+    "MSG_MAIN_METADATA_FAILED_JSON": "가상머신 정보를 읽는데 실패하였습니다.\n\nJSON Decoding Error, 잘못된 Value 값을 가지고 있습니다.",
+    "MSG_MAIN_METADATA_FAILED_NOFILEFOUND": "가상머신 정보를 읽는데 실패하였습니다.\n\nFile Cannot be found,Imaginary가 파일을 찾을수 없습니다.",
+    "MSG_MAIN_METADATA_FAILED_PERMISSION": "가상머신 정보를 읽는데 실패하였습니다.\n\nNo Permission, Imaginary가 데이터를 읽는데에 권한이 부족합니다.",
+    "MSG_MAIN_METADATA_FAILED_SYSTEM": "가상머신 정보를 읽는데 실패하였습니다.\n\nSystemError, 시스템 상으로 오류가 발생했습니다.",
+    "MSG_MAIN_METADATA_FAILED_INCOMPATIBLE": "가상머신 정보를 읽는데 실패하였습니다.\n\nIncompatible file format, Imaginary는 ZIP와, JSON 포맷만을 지원합니다.",
+
+    "MSG_UPDATE_FOUND_TITLE": "업데이트 발견",
+    "MSG_UPDATE_FOUND_DESC": "새로운 버전 ",
+    "MSG_UPDATE_FOUND_DESC_2": "을 발견하였습니다, Show Details.. 를 눌러 업데이트 정보를 확인하세요.",
+    "MSG_UPDATE_DEV_VERSION_TITLE": "개발자 버전 사용중",
+    "MSG_UPDATE_DEV_VERSION_DESC": "현재 ",
+    "MSG_UPDATE_DEV_VERSION_DESC2": " 버전보다 더 높은 버전을 사용하고 있습니다,\n이 버전은 매우 불안정하며, 버그가 자주 발생합니다.",
+
     "MSG_INFO_LANGUAGE_SAVED_TITLE": "언어 저장됨",
-    "MSG_INFO_LANGUAGE_SAVED": "프로그램을 재시작하여 언어 변경을 완료하세요."
+    "MSG_INFO_LANGUAGE_SAVED_DESC": "프로그램을 재시작하여 언어 변경을 완료하세요.",
+    "MSG_INFO_LANGUAGE_SAVE_FAIL_TITLE": "데이터 저장 실패",
+    "MSG_INFO_LANGUAGE_SAVE_FAIL_SYSTEM": "가상머신 정보를 읽는데 실패하였습니다.\n\nSystemError, 시스템 상으로 오류가 발생했습니다.",
+    "MSG_INFO_LANGUAGE_SAVE_FAIL_PERMISSION": "가상머신 정보를 읽는데 실패하였습니다.\n\nNo Permission, Imaginary가 데이터를 쓰는데 권한이 부족합니다.",
+    "MSG_INFO_LANGUAGE_SAVE_FAIL_NOFILEFOUND": "가상머신 정보를 읽는데 실패하였습니다.\n\nFile Cannot be found, Imaginary가 파일을 찾을수 없습니다."
 }
