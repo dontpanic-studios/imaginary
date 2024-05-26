@@ -19,9 +19,6 @@
 - Multiple Language Support (eg. en-US, ko-KR)
 - Provides Custom User Plugin Library (IPL/IUPL)
   
-## 🚩 Will be supported
-- Multiple Language Support (eg. en-US, ko-KR)
-
 ## ⚠ Warning!
 - From downloading source code directly from Github, QEMU File does not included on the source file. You have to copy full installation of QEMU(>=9.0.0-rc2) into "src/qemu" directory.
 - This project requires Python>=3.12.3, not older than 3.12 version.
