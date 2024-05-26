@@ -9,13 +9,12 @@ from src.language.lang import Language, LanguageList
 from src.gui.label import whynotclick
 from src.discord.intergration import Presence
 from src.gui.setting import info
+from src.support.iupl import loadPlugin, loadedPlugins
 from src.gui.editvm import editvm
 from src.gui.disktool import disk
 from dotenv import load_dotenv
 from pathlib import Path
 from fontTools.ttLib import TTFont
-import qdarktheme
-
 
 
 print('Installing Figtree Font.')
@@ -62,6 +61,7 @@ class Main(QWidget):
             self.setAcceptDrops(True)
             self.setWindowFlags(QtCore.Qt.WindowType.WindowCloseButtonHint | QtCore.Qt.WindowType.WindowMinimizeButtonHint)
             self.setupWidget()
+            self.loadPlugins()
         
             print('initallized.')
         except (Exception, TypeError) as e:
@@ -83,6 +83,7 @@ class Main(QWidget):
         self.label_Vm_Desc = QLabel(Language.getLanguageByEnum(LanguageList.NO_VM_AVALIABLE_DESC), self)
         self.label_Vm_Status = QLabel(Language.getLanguageByEnum(LanguageList.MAIN_STATUS_NULL), self)
         self.label_VMInfo = QLabel(Language.getLanguageByEnum(LanguageList.NO_METADATA_FOUND), self)
+        self.label_LoadedPlugins = QLabel(text=Language.getLanguageByEnum(LanguageList.MAIN_LOADEDPLUGINS) + str(loadedPlugins.copy()), parent=self)
 
         # image
         self.vm_background.setPixmap(QPixmap('src/png/background/bg1.png'))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
@@ -138,6 +139,7 @@ class Main(QWidget):
         self.setting.move(760, 15)
         self.label_VMInfo.move(350, 255)
         self.diskTool.move(660, 15)
+        self.label_LoadedPlugins.move(350, 640)
 
         self.vmListView.resize(290, 645)
         self.vmListView.clicked[QtCore.QModelIndex].connect(self.on_clicked)
@@ -152,6 +154,12 @@ class Main(QWidget):
         self.vmListView.installEventFilter(self)
         self.setLabelFont()
         self.setKRLocation()
+
+        if(self.checkIfClientModded() == True):
+            print("Modded Client Found!")
+            self.label_LoadedPlugins.show()
+        else:
+            self.label_LoadedPlugins.hide()
 
     def showCreateVMWindow(self):
         print("Opening CreateVM...")
@@ -236,6 +244,20 @@ class Main(QWidget):
             failReadData.exec()         
             return
 
+    def checkIfClientModded(self):
+        sub_folders = [name for name in os.listdir('src/plugins/') if os.path.isdir(os.path.join('src/plugins/', name))]
+        if(len(sub_folders) > 0):
+            return True
+        else:
+            return False
+
+    def loadPlugins(self):
+        try:
+            loadPlugin()
+        except:
+            print("Code Injection Failed!")
+            print(f"Raise Exceptions\n{traceback.format_exc()}")
+
     def closeEvent(self, event):
         sys.exit(0)
 
@@ -264,8 +286,11 @@ class Main(QWidget):
         self.label_VMInfo.setStyleSheet("Color : white; background:#2C2C2C;")
         self.diskTool.setFont(self.font_button)
         self.diskTool.setStyleSheet("Color : white; background-color:#262626;")
+        self.label_LoadedPlugins.setFont(self.font_button)
+        self.label_LoadedPlugins.setStyleSheet("Color : white; background-color:#2c2c2c;")
 
         self.label_Vm_Title.adjustSize()
+        self.label_LoadedPlugins.adjustSize()
         self.label_Vm_Desc.adjustSize()
 
     def reloadList(self):
@@ -325,7 +350,7 @@ class Main(QWidget):
             proc = psutil.Process(qemu.pid)
             try:
                 while(proc.status() == psutil.STATUS_RUNNING):
-                    self.label_Vm_Status.setText('Status: VM Started')
+                    self.label_Vm_Status.setText(Language.getLanguageByEnum(LanguageList.MAIN_STATUS_RUNNING))
                     self.label_Vm_Status.setStyleSheet('Color : #42f566; background-color: #2C2C2C;')
                     chkStatus = proc.status()
 
@@ -491,10 +516,14 @@ class Main(QWidget):
 
     def setKRLocation(self):
         if LANG == 'ko_KR':
+            print('KR Lang Detected, ')
             self.editVM.move(465, 205)
             self.imaginarySetting.move(480, 15)
         else:
             print('Dont Change Location, ENUS Detected.')    
+
+    def getWidget(self, name):
+        return self.name
 
 if __name__ == '__main__':
     Presence.connect()

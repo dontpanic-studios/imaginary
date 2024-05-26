@@ -16,6 +16,7 @@
     "MAIN_STATUS_RUNNING": "열심히 돌리는중..",
     "MAIN_VMSTART": "가상머신 시작",
     "MAIN_VMEDIT": "가상머신 수정",
+    "MAIN_LOADEDPLUGINS": "불러온 플러그인 목록: ",
 
     "CREATEVM_1_TITLE": "가상머신 생성",
     "CREATEVM_2_TITLE": "디스크 생성",
@@ -36,11 +37,16 @@
     "CREATEVM_LABEL_GPU_VRAM": "가상 GPU 메모리 설정 (Mb)",
     "CREATEVM_LABEL_GPU_LIST": "가상 GPU 선택",
     "CREATEVM_LABEL_DISK_SIZE": "디스크 크기",
+    "CREATEVM_LEGACY_BOOT": "레거시 부팅 사용하기",
     "CREATEVM_NEXT": "다음",
     "CREATEVM_SAVE": "저장",
     "CREATEVM_BACK": "이전",
 
     "EDITVM_TITLE": " 수정하기",
+
+    "DISKTOOL_TITLE": "디스크 도구",
+    "DISKTOOL_LABEL_DISKSIZE": "디스크 크기",
+    "DISKTOOL_LABEL_DISKTYPE": "디스크 설정",
 
     "MSG_VAR_TITLE": "알수없는 오류 발생",
     "MSG_VAR_DESC": "Imaginary가 알수없는 오류가 부딛쳤습니다,\n\n이러한 오류가 발생하는 경우는 Imaginary가 있는 위치의 폴더 이름이 알수없는 UTF-8 포맷으로 되어있거나,\n아니면 심각한 오류가 발생했을때 발생합니다.\n\nShow Details.. 를 보아 자세한 정보를 확인하세요.",
@@ -53,6 +59,14 @@
     "MSG_CREATEVM_DESC_MACOS_WARN": "Imaginary(이)가 사용자가 macOS 관련된 시스템을 설치하는것을 발견했습니다.\nImaginary는 QEMU 가상환경을 사용하지만, 윈도우에서만 현재로선 지원하기 때문에\nmacOS와 관련된 가속화가 사용이 불가할수 있습니다.\n\n사용자는 해당 사항에 확인하였음을 동의합니다",
     "MSG_CREATEVM_TITLE_EXIST": "가상머신 존재",
     "MSG_CREATEVM_DESC_EXIST": "생성할려는 가상머신은 이미 존재합니다",
+    "MSG_CREATEVM_SLOWGPU_TITLE": "저속 그래픽 사용",
+    "MSG_CREATEVM_SLOWGPU_DESC": "virtio-gpu 그래픽과 달리 저속 그래픽 세팅을 사용하고 있습니다!\n가상머신의 성능 저하가 있을수 있습니다.",
+    "MSG_CREATEVM_LEGACYBOOT_TITLE": "레거시 부팅 사용",
+    "MSG_CREATEVM_LEGACYBOOT_DESC": "현재 사용자가 설정한 가상머신 세팅중 레거시 부팅이 켜져있습니다,\n\nImaginary는 레거시대신 일반 UEFI 부팅을 권장하고 있으며\n레거시를 사용시 예상치 못한 문제가 발생할수 있습니다.",
+    "MSG_CREATEVM_ILLIGAL_VARIABLE_TITLE": "잘못된 설정 확인",
+    "MSG_CREATEVM_ILLIGAL_VGPU_MEM": "GPU Memory (Mb) (은)는 무조건 숫자형식이여야 합니다.",
+    "MSG_CREATEVM_ILLIGAL_CORE": "Max Core (은)는 무조건 숫자형식이여야 합니다.",
+    "MSG_CREATEVM_ILLIGAL_VGPUMEM_NOT_SUPPORTED": "선택한 그래픽 세팅은 메모리 변경이 불가능한 세팅입니다,\n'qxl' 또는 'isa-vga' 로 바꿔주세요.",
 
     "MSG_MAIN_METADATA_FAILED_TITLE": "읽기 실패",
     "MSG_MAIN_METADATA_FAILED_JSON": "가상머신 정보를 읽는데 실패하였습니다.\n\nJSON Decoding Error, 잘못된 Value 값을 가지고 있습니다.",
@@ -60,6 +74,8 @@
     "MSG_MAIN_METADATA_FAILED_PERMISSION": "가상머신 정보를 읽는데 실패하였습니다.\n\nNo Permission, Imaginary가 데이터를 읽는데에 권한이 부족합니다.",
     "MSG_MAIN_METADATA_FAILED_SYSTEM": "가상머신 정보를 읽는데 실패하였습니다.\n\nSystemError, 시스템 상으로 오류가 발생했습니다.",
     "MSG_MAIN_METADATA_FAILED_INCOMPATIBLE": "가상머신 정보를 읽는데 실패하였습니다.\n\nIncompatible file format, Imaginary는 ZIP와, JSON 포맷만을 지원합니다.",
+    "MSG_MAIN_EXPORTED_TITLE": "가상머신 내보내짐",
+    "MSG_MAIN_EXPORTED_DESC" : " (이)가  내보내졌습니다.",
 
     "MSG_UPDATE_FOUND_TITLE": "업데이트 발견",
     "MSG_UPDATE_FOUND_DESC": "새로운 버전 ",
