@@ -5,6 +5,7 @@ import sys
 from tkinter import messagebox
 from pypresence import DiscordNotFound
 from dotenv import load_dotenv
+import qdarktheme
 load_dotenv('./data/setting.env')
 
 print('load discord')

@@ -1,0 +1,12 @@
+{
+    "author": "DEVS:: STANDARD",
+    "data": {
+        "name": "Sample Plugin",
+        "desc": "Imaginary User Sample Plugin for Developers"
+    },
+    "sources": {
+        "main": "ThemeInjection",
+        "class": "ThemeInject"
+    },
+    "ignoreThisPlugin": true
+}

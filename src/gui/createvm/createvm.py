@@ -42,22 +42,22 @@ class CreateVM(QWidget):
         self.experimental_VMType_List = ['x86_64', 'arm', 'aarch64', 'i386', 'ppc', 'riscv32', 'riscv64', 'ppc64']
 
         self.label_Title = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_1_TITLE), self)
-        self.label_InputLabel = QLabel('VM Name', self)
-        self.label_InputLabel_disk = QLabel('Disk Size', self)
-        self.label_InputLabel_desc = QLabel('VM Description', self)
+        self.label_InputLabel = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_VMNAME), self)
+        self.label_InputLabel_disk = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_DISK_SIZE), self)
+        self.label_InputLabel_desc = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_VMDESC), self)
 
         self.label_createVM = whynotclick.Label(self)
-        self.label_createVM.setText('Save')
+        self.label_createVM.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_SAVE))
         self.label_loadISO = whynotclick.Label(self)
         self.label_turnFrameBack = whynotclick.Label(self)
-        self.label_turnFrameBack.setText('Back')
-        self.label_loadISO_title = QLabel('Load ISO File', self)
-        self.label_loadISO.setText('Select ISO Location..')
-        self.label_RamSize = QLabel('RAM Size', self)
-        self.label_VGAMemSize= QLabel('Virtual GPU Memory Size (Mb)', self)
-        self.label_GPUType = QLabel('Select GPU Type', self)
+        self.label_turnFrameBack.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_BACK))
+        self.label_loadISO_title = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_TITLE_LOADISO), self)
+        self.label_loadISO.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_LOADISO))
+        self.label_RamSize = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_TITLE_LOADISO), self)
+        self.label_VGAMemSize= QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_GPU_VRAM), self)
+        self.label_GPUType = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_GPU_LIST), self)
         self.label_DiskType = QLabel('Select Disk Type', self)
-        self.label_SysCoreSize = QLabel('CPU Core Size', self)
+        self.label_SysCoreSize = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_CPU), self)
 
         self.Input_VMName = QLineEdit(self)
         self.Input_VMDesc = QLineEdit(self)
@@ -68,22 +68,22 @@ class CreateVM(QWidget):
         self.Input_SysCoreSize = QLineEdit(self)
 
         self.experimental_HAX_Accel = QCheckBox(self)
-        self.experimental_HAX_Accel.setText('Lab: Enable TCG (Tiny Code Generator)')
-        self.whybutdontcreatedisk = QCheckBox(self, text='Skip Disk Creation')
+        self.experimental_HAX_Accel.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_TCG_ACCEL))
+        self.whybutdontcreatedisk = QCheckBox(self, text=Language.getLanguageByEnum(LanguageList.CREATEVM_SKIP_DISK))
         self.experimental_OpenGL_Accel = QCheckBox(self)
-        self.experimental_OpenGL_Accel.setText('Add Driver Disk to VM') 
+        self.experimental_OpenGL_Accel.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_DRIVER_DISK)) 
         self.experimental_isLegacy = QCheckBox(self)
-        self.experimental_isLegacy.setText('Set QEMU as Legacy Mode (BIOS, Non-UEFI)')
+        self.experimental_isLegacy.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_LEGACY_BOOT))
         
         self.experimental_GPUType = QComboBox(self)
         self.experimental_VMType = QComboBox(self)
 
         self.diskType_RAW = QRadioButton(self)
-        self.diskType_RAW.setText('RAW : RAW Disk image format, size of image is big but pretty fast')
+        self.diskType_RAW.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_DISKTYPE_RAW))
         self.diskType_QCOW2 = QRadioButton(self)
-        self.diskType_QCOW2.setText('QCow2 : QEMU image format v2, the most versatile format.')
+        self.diskType_QCOW2.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_DISKTYPE_QCOW2))
         self.diskType_VHDX = QRadioButton(self)
-        self.diskType_VHDX.setText('VMDK : Hyper-V Compatible image format, ...you want more?')
+        self.diskType_VHDX.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_DISKTYPE_VHDX))
 
         # font
         font_bold_title = self.label_Title.font()
@@ -268,18 +268,20 @@ class CreateVM(QWidget):
         print(f'vm setting: \n{metadata}')
 
         if metadata['isaccel']['bool'] == True:
-            msg = QMessageBox.warning(self, '실험적 기능 켜짐', '경고!\n\n하드웨어 가상화가 켜져있습니다!\n해당 기능은 특정 기기에서 작동이 안될수 있습니다!')
-        if metadata['vga']['type'] != 'virtio-gpu' or metadata['vga']['type'] != 'virtio-gpu-gl':
-            msg = QMessageBox.warning(self, '저속 그래픽 사용', 'virtio-gpu 그래픽과 달리 저속 그래픽 세팅을 사용하고 있습니다!\n가상머신의 성능 저하가 있을수 있습니다.')
+            msg = QMessageBox.warning(self, Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_TITLE_TCG_ON), Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_DESC_TCG_ON))
+        if metadata['vga']['type'] != 'virtio-gpu':
+            msg = QMessageBox.warning(self, Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_SLOWGPU_TITLE), Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_SLOWGPU_DESC))
         if metadata['vga']['type'] == 'virtio-gpu' and metadata['vga']['mem'] != '':
-            msg = QMessageBox.critical(self, '그래픽 메모리 지원 안됨', '선택한 그래픽 세팅은 메모리 변경이 불가능한 세팅입니다,\n"qxl" 또는 "isa-vga" 로 바꿔주세요.')    
+            msg = QMessageBox.critical(self, Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_ILLIGAL_VARIABLE_TITLE), Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_ILLIGAL_VGPUMEM_NOT_SUPPORTED))    
             return
+        if metadata['desc'] == '':
+            metadata['desc'] = Language.getLanguageByEnum(LanguageList.NO_DESCRIPTION_FOUND)
         
         if metadata['max_core'].isnumeric() != True:
-            msg = QMessageBox.critical(self, '잘못된 설정 확인', 'Max Core (은)는 무조건 숫자형식이여야 합니다.')    
+            msg = QMessageBox.critical(self, Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_ILLIGAL_VARIABLE_TITLE), Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_ILLIGAL_CORE))    
             return
         if metadata['vga']['type'] != 'virtio-gpu' and metadata['vga']['mem'].isnumeric() != True:
-            msg = QMessageBox.critical(self, '잘못된 설정 확인', 'GPU Memory (Mb) (은)는 무조건 숫자형식이여야 합니다.')    
+            msg = QMessageBox.critical(self, Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_ILLIGAL_VARIABLE_TITLE), Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_ILLIGAL_VGPU_MEM))    
             return
         
         if self.diskType_QCOW2.isChecked():
@@ -316,9 +318,9 @@ class CreateVM(QWidget):
                     if(metadata['disk']['disk_size'] == ''):
                         metadata['disk']['disk_size'] = 'No Disk Avaliable'
                     if(metadata['disk']['disk_type'] != 'raw' or metadata['disk']['disk_type'] != 'vhdx' and metadata['vm_type'] == 'win'):
-                        warnSlowPerform = QMessageBox.warning(self, '권고', 'Imaginary(이)가 가상머신이 윈도우인것을 감지하였습니다만,\n디스크 타입이 RAW또는 VHDX방식이 아닌것을 확인했습니다.\n\n해당 디스크 타입은 윈도우 가상 환경에서 "기본적으로" 권장되지 않으며\n이 디스크때문에 실제 성능에 관여를 할수 있습니다.\n\n사용자는 해당 사항을 확인하였으며, 이와같은 성능 저하의 가능성에 동의합니다.')
+                        warnSlowPerform = QMessageBox.warning(self, Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_TITLE_WINDOWS_WARN), Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_DESC_WINDOWS_WARN))
                     if(metadata['vm_type'] == 'mac'):
-                        warnMacNoAccel = QMessageBox.warning(self, 'macOS 사용에 관해서', 'Imaginary(이)가 사용자가 macOS 관련된 시스템을 설치하는것을 발견했습니다.\nImaginary는 QEMU 가상환경을 사용하지만, 윈도우에서만 현재로선 지원하기 때문에\nmacOS와 관련된 가속화가 사용이 불가할수 있습니다.\n\n사용자는 해당 사항에 확인하였음을 동의합니다.')
+                        warnMacNoAccel = QMessageBox.warning(self, Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_TITLE_MACOS_WARN), Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_DESC_MACOS_WARN))
 
                     json.dump(metadata, f, indent=3, sort_keys=True)
                     f.close()    
@@ -342,7 +344,7 @@ class CreateVM(QWidget):
                     self.label_InputLabel.adjustSize()
                 f.close()
         else:
-            msgbox_vmExist = QMessageBox.warning(self, '가상머신 존재', '생성할려는 가상머신은 이미 존재합니다!')
+            msgbox_vmExist = QMessageBox.warning(self, Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_TITLE_EXIST), Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_DESC_EXIST))
 
     def loadISO(self):
         fname = QFileDialog.getOpenFileName(self)        
@@ -411,9 +413,8 @@ class CreateVM(QWidget):
         self.experimental_isLegacy.adjustSize()
         self.experimental_VMType.adjustSize()
 
-        self.label_Title.setText('General Setup')
         self.label_createVM.clicked.connect(self.frame3)
-        self.label_createVM.setText('Next')
+        self.label_createVM.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_NEXT))
 
     def frame2(self): # etc type
         print("Frame1 Off, Frame 2 On")
@@ -500,7 +501,7 @@ class CreateVM(QWidget):
         self.experimental_GPUType.resize(QSize(120, 30))
 
         self.label_createVM.clicked.connect(self.saveChange)
-        self.label_createVM.setText("Create")
+        self.label_createVM.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_SAVE))
         self.label_createVM.adjustSize()
         self.label_turnFrameBack.clicked.connect(self.frame3)
         self.label_turnFrameBack.setStyleSheet("Color : white;")
@@ -574,7 +575,7 @@ class CreateVM(QWidget):
         self.label_InputLabel_disk.move(20, 220)
 
         self.label_createVM.clicked.connect(self.frame2)
-        self.label_createVM.setText("Next")
+        self.label_createVM.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_NEXT))
         self.label_createVM.adjustSize()
         self.label_turnFrameBack.clicked.connect(self.frame1)
         self.label_turnFrameBack.setStyleSheet("Color : white;")    

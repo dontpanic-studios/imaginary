@@ -1,7 +1,8 @@
 from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QComboBox
 from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6 import QtCore
-import os, sys, logging, dotenv, traceback
+import os, logging, dotenv, traceback
+from src.language.lang import Language, LanguageList
 from dotenv import load_dotenv
 
 log = logging
@@ -22,21 +23,23 @@ class CreateVM(QWidget):
             self.setWindowFlags(QtCore.Qt.WindowType.WindowCloseButtonHint | QtCore.Qt.WindowType.WindowMinimizeButtonHint)
             self.initUI()
             log.info('initallized.')
-        except Exception:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            log.critical(f"ERROR Occurred!\nLog: {exc_type}, {exc_obj}, {exc_tb}, {fname}")
-            errInfoWinInit = QMessageBox.critical(self, '오류가 발생하였습니다.', '재설정을 하는 중에 오류가 발생했습니다.\n보통 프로그램이 꼬였거나, 저장된 위치에 한글이 들어있으면 안되는 경우가 있습니다.')
+        except:
+            errInfoWinInit = QMessageBox(self)
+            errInfoWinInit.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_VAR_TITLE))
+            errInfoWinInit.setText(Language.getLanguageByEnum(LanguageList.MSG_VAR_DESC))
+            errInfoWinInit.setDetailedText(traceback.format_exc())
+
             log.critical('failed to intiallized window')
 
     def initUI(self):
+        self.languages = ['en_US', 'ko_KR']
         self.label_Logo = QLabel(self)
         self.label_InfoTitle = QLabel("Imaginary", self)
-        self.label_Version = QLabel(f"{os.environ.get('Ver')}\nOpen-source QEMU GUI Tool", self)
+        self.label_Version = QLabel(f"{os.environ.get('Ver')}\nOpen-source QEMU GUI Wrapper", self)
         self.label_Logo.setPixmap(QPixmap('./src/png/icons/128.png')) 
 
         self.enableLabSetting = QComboBox(self)
-        self.enableLabSetting.addItems(['en_US', 'ko_KR'])
+        self.enableLabSetting.addItems(self.languages)
 
         font_bold_title = self.label_InfoTitle.font()
         font_bold_title.setBold(True)
@@ -76,21 +79,27 @@ class CreateVM(QWidget):
         if os.environ.get("Language") != self.enableLabSetting.currentText():
             try:
                 dotenv.set_key(file, "Language", self.enableLabSetting.currentText())
-                inf = QMessageBox.information(self, "언어 저장됨", "프로그램을 재시작하여 언어 변경을 완료하세요.")
+                inf = QMessageBox.information(self, Language.getLanguageByEnum(LanguageList.MSG_INFO_LANGUAGE_SAVED_TITLE), Language.getLanguageByEnum(LanguageList.MSG_INFO_LANGUAGE_SAVED_DESC))
             except (FileNotFoundError, SystemError,  PermissionError) as e:
                 print('failed to read metadata, is file even?')    
                 failReadData = QMessageBox(self)
-                failReadData.setWindowTitle('데이터 저장 실패')
+                failReadData.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_INFO_LANGUAGE_SAVE_FAIL_TITLE))
                 failReadData.setIcon(QMessageBox.Icon.Critical)
                 failReadData.setWindowIcon(QIcon('src/png/icons/remove128.png'))
                 if e == SystemError:
-                    failReadData.setText('가상머신 정보를 읽는데 실패하였습니다.\n\nSystemError, 시스템 상으로 오류가 발생했습니다.')
+                    failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_INFO_LANGUAGE_SAVE_FAIL_SYSTEM))
                 elif e == PermissionError:
-                    failReadData.setText('가상머신 정보를 읽는데 실패하였습니다.\n\nNo Permission, Imaginary가 데이터를 쓰는데 권한이 부족합니다.')
+                    failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_INFO_LANGUAGE_SAVE_FAIL_PERMISSION))
                 else:
-                    failReadData.setText('가상머신 정보를 읽는데 실패하였습니다.\n\nFile Cannot be found, Imaginary가 파일을 찾을수 없습니다.')
+                    failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_INFO_LANGUAGE_SAVE_FAIL_NOFILEFOUND))
                 failReadData.setDetailedText(f'{traceback.format_exc()}')
                 failReadData.exec()    
                 return
         else:
             print("No Data has been changed.")
+
+    def checkLangFiles(self):
+        for f in os.listdir('./data/language/'):
+            if f.endswith('.lgf'):
+                self.languages.append(f)
+        print("Detected Language list: " + self.languages)       
