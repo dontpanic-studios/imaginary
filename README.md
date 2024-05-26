@@ -16,6 +16,8 @@
 - Simple, Easy to Use GUI
 - Multiple System Emulation Support
 - Integrated QEMU Disk Image creation tool
+- Multiple Language Support (eg. en-US, ko-KR)
+- Provides Custom User Plugin Library (IPL/IUPL)
   
 ## 🚩 Will be supported
 - Multiple Language Support (eg. en-US, ko-KR)
