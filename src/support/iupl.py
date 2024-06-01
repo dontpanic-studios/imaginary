@@ -19,7 +19,7 @@ def loadPlugin():
                     isIgnore = data['ignoreThisPlugin']
                     if(isIgnore == False):
                         print(f"IUPL: Trying to load plugin -> {data['data']['name']}")
-                        print(f"IUPL: Metadata -> \nIUPL: Name -> {data['data']['name']}\nIUPL: Description -> {data['data']['desc']}\nIUPL: Author -> {data['author']}\nIUPL: Sources/Main -> {data['sources']['main']}\nIUPL: Sources/Class -> {data['sources']['class']}")
+                        print(f"IUPL: Metadata:\nIUPL: Name -> {data['data']['name']}\nIUPL: Description -> {data['data']['desc']}\nIUPL: Author -> {data['author']}\nIUPL: Sources/Main -> {data['sources']['main']}\nIUPL: Sources/Class -> {data['sources']['class']}")
                         print("IUPL: Trying to inject code..")
                         try:
                             module = importlib.import_module(f"src.plugins.{i}.{data['sources']['main']}")

@@ -46,7 +46,9 @@
 
     "DISKTOOL_TITLE": "디스크 도구",
     "DISKTOOL_LABEL_DISKSIZE": "디스크 크기",
-    "DISKTOOL_LABEL_DISKTYPE": "디스크 설정",
+    "DISKTOOL_LABEL_DISKTYPE": "디스크 환경",
+    "DISKTOOL_LABEL_DISKNAME": "디스크 이름",
+    "DISKTOOL_CREATE_DISK": "디스크 만들기",
 
     "MSG_VAR_TITLE": "알수없는 오류 발생",
     "MSG_VAR_DESC": "Imaginary가 알수없는 오류가 부딛쳤습니다,\n\n이러한 오류가 발생하는 경우는 Imaginary가 있는 위치의 폴더 이름이 알수없는 UTF-8 포맷으로 되어있거나,\n아니면 심각한 오류가 발생했을때 발생합니다.\n\nShow Details.. 를 보아 자세한 정보를 확인하세요.",
@@ -89,5 +91,12 @@
     "MSG_INFO_LANGUAGE_SAVE_FAIL_TITLE": "데이터 저장 실패",
     "MSG_INFO_LANGUAGE_SAVE_FAIL_SYSTEM": "가상머신 정보를 읽는데 실패하였습니다.\n\nSystemError, 시스템 상으로 오류가 발생했습니다.",
     "MSG_INFO_LANGUAGE_SAVE_FAIL_PERMISSION": "가상머신 정보를 읽는데 실패하였습니다.\n\nNo Permission, Imaginary가 데이터를 쓰는데 권한이 부족합니다.",
-    "MSG_INFO_LANGUAGE_SAVE_FAIL_NOFILEFOUND": "가상머신 정보를 읽는데 실패하였습니다.\n\nFile Cannot be found, Imaginary가 파일을 찾을수 없습니다."
+    "MSG_INFO_LANGUAGE_SAVE_FAIL_NOFILEFOUND": "가상머신 정보를 읽는데 실패하였습니다.\n\nFile Cannot be found, Imaginary가 파일을 찾을수 없습니다.",
+
+    "MSG_CONTEXT_DELETEVM_CONFIRM_TITLE": "삭제 확인",
+    "MSG_CONTEXT_DELETEVM_CONFIRM_DESC": "가상머신 ",
+    "MSG_CONTEXT_DELETEVM_CONFIRM_DESC_2": "을 정말로 지우시겠습니까?\n이 과정은 되돌릴수 없습니다.",
+    "MSG_CONTEXT_DELETEVM_SUCCESS_TITLE": "삭제됨",
+    "MSG_CONTEXT_DELETEVM_SUCCESS_DESC": "성공적으로 ",
+    "MSG_CONTEXT_DELETEVM_SUCCESS_DESC_2": "을 지웠습니다."
 }

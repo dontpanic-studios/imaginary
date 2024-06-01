@@ -308,7 +308,7 @@ class Main(QWidget):
                     self.vmListView.setModel(self.model)
                     if len(self.sub_folders) > 0:
                         self.label_Vm_Title.setText(Language.getLanguageByEnum(LanguageList.SELECT_VM))
-                        self.label_Vm_Desc.setText(Language.getLanguageByEnum(LanguageList.DUMMY))
+                        self.label_Vm_Desc.setText(Language.getLanguageByEnum(LanguageList.SELECT_VM))
                         self.label_Vm_Title.adjustSize()
                         self.label_Vm_Desc.adjustSize()
                     else:
@@ -436,12 +436,12 @@ class Main(QWidget):
 
     def confirmDeleteVM(self, index):
         item = self.model.itemFromIndex(index)
-        isTrue = QMessageBox.warning(self, '정말로 지울까요?', f'가상머신 {item.text()} (을)를 지울까요?\n다시는 취소할수 없어요!', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        isTrue = QMessageBox.warning(self, Language.getLanguageByEnum(LanguageList.MSG_CONTEXT_DELETEVM_CONFIRM_TITLE), Language.getLanguageByEnum(LanguageList.MSG_CONTEXT_DELETEVM_CONFIRM_DESC) + item.text() + Language.getLanguageByEnum(LanguageList.MSG_CONTEXT_DELETEVM_CONFIRM_DESC_2), QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
 
         if(isTrue == QMessageBox.StandardButton.Yes):
             try:
                 shutil.rmtree(f'src\\vm\\{item.text()}')
-                success = QMessageBox.information(self, '삭제됨', f'{item.text()} (이)가 성공적으로 지워졌습니다.')
+                success = QMessageBox.information(self, Language.getLanguageByEnum(LanguageList.MSG_CONTEXT_DELETEVM_CONFIRM_TITLE), Language.getLanguageByEnum(LanguageList.MSG_CONTEXT_DELETEVM_SUCCESS_DESC) + item.text() + Language.getLanguageByEnum(LanguageList.MSG_CONTEXT_DELETEVM_SUCCESS_DESC_2))
                 self.reloadList()
             except:
                 failed = QMessageBox(self, '삭제 이벤트 취소됨', f'가상머신 {item.text()}를 지우다가 알수없는 오류가 발생했습니다.\n자세한 내용은 Show Details.. 를 눌러 확인하세요.')
@@ -522,8 +522,8 @@ class Main(QWidget):
         else:
             print('Dont Change Location, ENUS Detected.')    
 
-    def getWidget(self, name):
-        return self.name
+    def getWidget(name):
+        pass
 
 if __name__ == '__main__':
     Presence.connect()

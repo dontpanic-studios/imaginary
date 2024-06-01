@@ -5,7 +5,7 @@
     "NO_METADATA_FOUND": "Cannot find VM Metadata information.",
     "NO_VM_AVALIABLE": "No VM has been found",
     "NO_VM_AVALIABLE_DESC": "How about making new one?",
-    "DUMMY": "ohmygodwtf",
+    "DUMMY": "Dummy Text, Replace it before release.",
     "SELECT_VM": "Select VM to Start!",
     "CREATE_VM": "Create VM",
     "IMAGINARY_INFO": "Info",
@@ -44,9 +44,18 @@
     "CREATEVM_BACK": "Back",
 
     "EDITVM_TITLE": "Edit ",
+
+    "DISKTOOL_TITLE": "Disk Tool",
+    "DISKTOOL_LABEL_DISKSIZE": "Disk Size",
+    "DISKTOOL_LABEL_DISKTYPE": "Disk Type",
+    "DISKTOOL_LABEL_DISKNAME": "Disk Name",
+    "DISKTOOL_CREATE_DISK": "Create Disk",
     
     "MSG_VAR_TITLE": "Unknown Error Occurred",
     "MSG_VAR_DESC": "Imaginary found out that an unknown error occurred while startup process\n\nUsually this happens if Imaginary's project folder location contains non-utf8 encoding folder or,\nSerious problem happened.\n\nRead Show Details.. for more information.",
+
+    "MSG_NODISCORD_TITLE": "Cannot find Discord",
+    "MSG_NODISCORD_DESC": "Imaginary cannot find discord desktop client.\nBy clicking the OK button, the user agrees that the relevant features may be disabled.",
 
     "MSG_CREATEVM_TITLE_TCG_ON": "Lab Config Enabled!",
     "MSG_CREATEVM_DESC_TCG_ON": "Warning!\n\nGuest Acceleration has been enabled,\nThis may not work with other OS.",
@@ -81,5 +90,12 @@
     "MSG_INFO_LANGUAGE_SAVE_FAIL_TITLE": "Data Save failed.",
     "MSG_INFO_LANGUAGE_SAVE_FAIL_SYSTEM": "Failed to Save Language Data\n\nSystemError, An Error occurred in the system.",
     "MSG_INFO_LANGUAGE_SAVE_FAIL_PERMISSION": "Failed to Save Language Data\n\nNo Permission, Imaginary does not have enough permission to write data.",
-    "MSG_INFO_LANGUAGE_SAVE_FAIL_NOFILEFOUND": "Failed to Save Language Data\n\nFile Cannot be found, Imaginary cannot find language data file."
+    "MSG_INFO_LANGUAGE_SAVE_FAIL_NOFILEFOUND": "Failed to Save Language Data\n\nFile Cannot be found, Imaginary cannot find language data file.",
+    
+    "MSG_CONTEXT_DELETEVM_CONFIRM_TITLE": "Confirm Deleting VM",
+    "MSG_CONTEXT_DELETEVM_CONFIRM_DESC": "Are you sure about deleting ",
+    "MSG_CONTEXT_DELETEVM_CONFIRM_DESC_2": "?\nYou cannot undo it after deleting.",
+    "MSG_CONTEXT_DELETEVM_SUCCESS_TITLE": "Deleted",
+    "MSG_CONTEXT_DELETEVM_SUCCESS_DESC": "Successfully deleted ",
+    "MSG_CONTEXT_DELETEVM_SUCCESS_DESC_2": ""
 }

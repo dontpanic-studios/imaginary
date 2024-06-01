@@ -26,9 +26,20 @@ class Host:
         except:
             raise Exceptions.InvaildCodeInjection
 
-    #depra
-    def replaceWidget(widget):
+    """
+    Replace Widget to different location
+    :param widget: QWidgets
+    :param x: x loc
+    :param y: y loc
+    """
+    def replaceWidget(widget, x: int, y: int):
         try:
-            pass
+            widget.move(x, y)
+        except:
+            raise Exceptions.InvaildCodeInjection\
+            
+    def getWidgets():
+        try:
+            returned = inspect.getmembers(main.Main, predicate=inspect.ismodule)
         except:
             raise Exceptions.InvaildCodeInjection

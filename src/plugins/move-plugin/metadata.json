@@ -1,0 +1,12 @@
+{
+    "author": "DEVS:: STANDARD",
+    "data": {
+        "name": "Widget Move Sample",
+        "desc": "Imaginary User Sample Plugin for Developers"
+    },
+    "sources": {
+        "main": "MoveWidget",
+        "class": "WidgetMovement"
+    },
+    "ignoreThisPlugin": false
+}

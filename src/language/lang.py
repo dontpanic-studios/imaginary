@@ -78,6 +78,12 @@ class LanguageList(Enum): # oh no
     MSG_CREATEVM_SLOWGPU_TITLE = auto()
     MSG_CREATEVM_SLOWGPU_DESC = auto()
     EDITVM_TITLE = auto()
+    MSG_CONTEXT_DELETEVM_CONFIRM_TITLE = auto()
+    MSG_CONTEXT_DELETEVM_CONFIRM_DESC = auto()
+    MSG_CONTEXT_DELETEVM_CONFIRM_DESC_2 = auto()
+    MSG_CONTEXT_DELETEVM_SUCCESS_TITLE = auto()
+    MSG_CONTEXT_DELETEVM_SUCCESS_DESC = auto()
+    MSG_CONTEXT_DELETEVM_SUCCESS_DESC_2 = auto()
 
 class Language():
     def __init__(): # type: ignore
