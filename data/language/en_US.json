@@ -26,6 +26,7 @@
     "CREATEVM_LABEL_VMDESC": "VM Description",
     "CREATEVM_TITLE_LOADISO": "ISO Location",
     "CREATEVM_LABEL_LOADISO": "Load ISO..",
+    "CREATEVM_LABEL_SELECT_DISKTYPE": "Select Disk Type",
     "CREATEVM_DISKTYPE_RAW": "RAW : Biggest but, fastest Disk type.",
     "CREATEVM_DISKTYPE_QCOW2": "QCow2 : Default QEMU Disk type.",
     "CREATEVM_DISKTYPE_VHDX": "VHDX : Compatible Disk type with Hyper-V",
@@ -34,6 +35,7 @@
     "CREATEVM_DRIVER_DISK": "Add Driver disk to Guest",
     "CREATEVM_NO_DISK": "Disk does not exists",
     "CREATEVM_LABEL_RAM": "Virtual Memory",
+    "CREATEVM_GUEST_ARCH": "Select Guest Architecture",
     "CREATEVM_LABEL_CPU": "Virtual CPU Core",
     "CREATEVM_LABEL_GPU_VRAM": "VGPU Memory (Mb)",
     "CREATEVM_LABEL_GPU_LIST": "Select VGPU",
@@ -52,7 +54,8 @@
     "DISKTOOL_CREATE_DISK": "Create Disk",
     
     "MSG_VAR_TITLE": "Unknown Error Occurred",
-    "MSG_VAR_DESC": "Imaginary found out that an unknown error occurred while startup process\n\nUsually this happens if Imaginary's project folder location contains non-utf8 encoding folder or,\nSerious problem happened.\n\nRead Show Details.. for more information.",
+    "MSG_VAR_DESC": "Imaginary found out that an unknown error occurred while startup process\n\nUsually this happens if Imaginary's project folder location contains non-utf8 encoding folder or, some serious problem happened.\n\nRead Show Details.. for more information.",
+    "MSG_VAR_PERMISSION": "Imaginary does not have permission to read the language file.\nPlease run as Administractor to continue.",
 
     "MSG_NODISCORD_TITLE": "Cannot find Discord",
     "MSG_NODISCORD_DESC": "Imaginary cannot find discord desktop client.\nBy clicking the OK button, the user agrees that the relevant features may be disabled.",
@@ -82,8 +85,10 @@
     "MSG_UPDATE_FOUND_DESC": "Found new version ",
     "MSG_UPDATE_FOUND_DESC_2": " , Click 'Show Details..' to read update log.",
     "MSG_UPDATE_DEV_VERSION_TITLE": "Using Developer Version",
-    "MSG_UPDATE_DEV_VERSION_DESC": "You are currently using  ",
-    "MSG_UPDATE_DEV_VERSION_DESC2": " 버전보다 더 높은 버전을 사용하고 있습니다,\n이 버전은 매우 불안정하며, 버그가 자주 발생합니다.",
+    "MSG_UPDATE_DEV_VERSION_DESC": "You are currently using newer version than ",
+    "MSG_UPDATE_DEV_VERSION_DESC2": " .\nThis version is unstable and may have some problem with it.",
+    "MSG_UPDATE_UNKNOWN_TITLE": "Using Unknown Version",
+    "MSG_UPDATE_UNKNOWN_DESC": "Unknown version found, You sure about doing this?",
 
     "MSG_INFO_LANGUAGE_SAVED_TITLE": "Language Saved",
     "MSG_INFO_LANGUAGE_SAVED_DESC": "Restart the program to complete.",
@@ -97,5 +102,8 @@
     "MSG_CONTEXT_DELETEVM_CONFIRM_DESC_2": "?\nYou cannot undo it after deleting.",
     "MSG_CONTEXT_DELETEVM_SUCCESS_TITLE": "Deleted",
     "MSG_CONTEXT_DELETEVM_SUCCESS_DESC": "Successfully deleted ",
-    "MSG_CONTEXT_DELETEVM_SUCCESS_DESC_2": ""
+    "MSG_CONTEXT_DELETEVM_SUCCESS_DESC_2": "",
+
+    "MSG_IUPL_INITALLIZE_FAIL_TITLE": "IUPL Initallizing failed",
+    "MSG_IUPL_INITALLIZE_FAIL_DESC": "Plugin code injection failed, please contact plugin writer."
 }

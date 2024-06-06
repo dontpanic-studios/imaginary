@@ -25,6 +25,7 @@
     "CREATEVM_LABEL_VMDESC": "가상머신 설명",
     "CREATEVM_TITLE_LOADISO": "ISO 위치",
     "CREATEVM_LABEL_LOADISO": "ISO 불러오기..",
+    "CREATEVM_LABEL_SELECT_DISKTYPE": "디스크 환경 선택",
     "CREATEVM_DISKTYPE_RAW": "RAW : 용량이 크지만 가장 빠른 디스크 타입입니다.",
     "CREATEVM_DISKTYPE_QCOW2": "QCow2 : QEMU 기본 디스크 타입입니다, ",
     "CREATEVM_DISKTYPE_VHDX": "VHDX : Hyper-V와 호환되는 디스크 타입입니다.",
@@ -38,6 +39,7 @@
     "CREATEVM_LABEL_GPU_LIST": "가상 GPU 선택",
     "CREATEVM_LABEL_DISK_SIZE": "디스크 크기",
     "CREATEVM_LEGACY_BOOT": "레거시 부팅 사용하기",
+    "CREATEVM_GUEST_ARCH": "가상머신 아키텍쳐 선택",
     "CREATEVM_NEXT": "다음",
     "CREATEVM_SAVE": "저장",
     "CREATEVM_BACK": "이전",
@@ -52,6 +54,7 @@
 
     "MSG_VAR_TITLE": "알수없는 오류 발생",
     "MSG_VAR_DESC": "Imaginary가 알수없는 오류가 부딛쳤습니다,\n\n이러한 오류가 발생하는 경우는 Imaginary가 있는 위치의 폴더 이름이 알수없는 UTF-8 포맷으로 되어있거나,\n아니면 심각한 오류가 발생했을때 발생합니다.\n\nShow Details.. 를 보아 자세한 정보를 확인하세요.",
+    "MSG_VAR_PERMISSION": "Imaginary가 언어 파일을 읽는데 권한이 부족합니다, 관리자 권한으로 실행해주세요.",
 
     "MSG_CREATEVM_TITLE_TCG_ON": "실험적 기능 켜짐",
     "MSG_CREATEVM_DESC_TCG_ON": "경고!\n\n하드웨어 가상화가 켜져있습니다!\n해당 기능은 특정 기기에서 작동이 안될수 있습니다!",
@@ -85,6 +88,8 @@
     "MSG_UPDATE_DEV_VERSION_TITLE": "개발자 버전 사용중",
     "MSG_UPDATE_DEV_VERSION_DESC": "현재 ",
     "MSG_UPDATE_DEV_VERSION_DESC2": " 버전보다 더 높은 버전을 사용하고 있습니다,\n이 버전은 매우 불안정하며, 버그가 자주 발생합니다.",
+    "MSG_UPDATE_UNKNOWN_TITLE": "알수 없는 버전",
+    "MSG_UPDATE_UNKNOWN_DESC": "Imaginary가 알수 없는 버전을 확인했습니다, 정말로 이 버전을 쓰실건가요?",
 
     "MSG_INFO_LANGUAGE_SAVED_TITLE": "언어 저장됨",
     "MSG_INFO_LANGUAGE_SAVED_DESC": "프로그램을 재시작하여 언어 변경을 완료하세요.",
@@ -98,5 +103,8 @@
     "MSG_CONTEXT_DELETEVM_CONFIRM_DESC_2": "을 정말로 지우시겠습니까?\n이 과정은 되돌릴수 없습니다.",
     "MSG_CONTEXT_DELETEVM_SUCCESS_TITLE": "삭제됨",
     "MSG_CONTEXT_DELETEVM_SUCCESS_DESC": "성공적으로 ",
-    "MSG_CONTEXT_DELETEVM_SUCCESS_DESC_2": "을 지웠습니다."
+    "MSG_CONTEXT_DELETEVM_SUCCESS_DESC_2": "을 지웠습니다.",
+
+    "MSG_IUPL_INITALLIZE_FAIL_TITLE": "IUPL 재설정 실패",
+    "MSG_IUPL_INITALLIZE_FAIL_DESC": "플러그인 코드 인젝션 과정이 실패하였습니다, 플러그인 제작자를 연락해주십시오."
 }

@@ -37,15 +37,6 @@ try:
 except FileNotFoundError:
     print('Setting ENV File cannot be found!')
 
-class MyProxyStyle(QProxyStyle):
-    pass
-    def pixelMetric(self, QStyle_PixelMetric, option=None, widget=None):
-
-        if QStyle_PixelMetric == QStyle.PM_SmallIconSize:
-            return 60
-        else:
-            return QProxyStyle.pixelMetric(self, QStyle_PixelMetric, option, widget)
-
 class Main(QWidget):
     def __init__(self):
         print(f'Imaginary {VER}\nPyQt v{QtCore.qVersion()}')
@@ -64,14 +55,19 @@ class Main(QWidget):
             self.loadPlugins()
         
             print('initallized.')
-        except (Exception, TypeError) as e:
+        except (Exception, TypeError, PermissionError) as e:
             print(f"ERROR Occurred!\nLog: \n{traceback.format_exc()}")
             errInfoWinInit = QMessageBox(self)
             errInfoWinInit.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_VAR_TITLE))
-            errInfoWinInit.setText(Language.getLanguageByEnum(LanguageList.MSG_VAR_DESC))
+            if(e == PermissionError):
+                errInfoWinInit.setText(Language.getLanguageByEnum(LanguageList.MSG_VAR_PERMISSION))
+            else:
+                errInfoWinInit.setText(Language.getLanguageByEnum(LanguageList.MSG_VAR_DESC))
             errInfoWinInit.setDetailedText(traceback.format_exc())
+            errInfoWinInit.setIcon(QMessageBox.Icon.Critical)
+            errInfoWinInit.exec()
             print('failed to intiallized window')
-            return
+            exit("Program Exited cause unknown problem has been appeared.")
 
     def setupWidget(self):
         # label
@@ -81,7 +77,7 @@ class Main(QWidget):
         self.label_Title.setText("🌠 Imaginary")
         self.label_Vm_Title = QLabel(Language.getLanguageByEnum(LanguageList.NO_VM_AVALIABLE), self)
         self.label_Vm_Desc = QLabel(Language.getLanguageByEnum(LanguageList.NO_VM_AVALIABLE_DESC), self)
-        self.label_Vm_Status = QLabel(Language.getLanguageByEnum(LanguageList.MAIN_STATUS_NULL), self)
+        self.label_Vm_Status = QLabel(Language.getLanguageByEnum(LanguageList.MAIN_STATUS_NULL), self) #DEBUG
         self.label_VMInfo = QLabel(Language.getLanguageByEnum(LanguageList.NO_METADATA_FOUND), self)
         self.label_LoadedPlugins = QLabel(text=Language.getLanguageByEnum(LanguageList.MAIN_LOADEDPLUGINS) + str(loadedPlugins.copy()), parent=self)
 
@@ -342,12 +338,12 @@ class Main(QWidget):
         try:
             if(data['isaccel']['bool'] == False):
                 if(data['vga']['type'] == 'isa-vga'):
-                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-{data['emulate']} -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']},vgamem_mb={data['vga']['mem']} {data['addition']['args']}"], stdout=subprocess.PIPE)
+                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-{data['emulate']} -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']},vgamem_mb={data['vga']['mem']} {data['addition']['args']}"], stdout=subprocess.PIPE) #DEBUG
                 else:
-                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-{data['emulate']} -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} {data['addition']['args']}"], stdout=subprocess.PIPE)
+                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-{data['emulate']} -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} {data['addition']['args']}"], stdout=subprocess.PIPE) #DEBUG
             else:
-                qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-{data['emulate']} -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} -accel {data['isaccel']['acceltype']},thread=multi {data['addition']['args']}"], stdout=subprocess.PIPE)
-            proc = psutil.Process(qemu.pid)
+                qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-{data['emulate']} -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} -accel {data['isaccel']['acceltype']},thread=multi {data['addition']['args']}"], stdout=subprocess.PIPE) #DEBUG
+            proc = psutil.Process(qemu.pid) #DEBUG
             try:
                 while(proc.status() == psutil.STATUS_RUNNING):
                     self.label_Vm_Status.setText(Language.getLanguageByEnum(LanguageList.MAIN_STATUS_RUNNING))
@@ -378,33 +374,18 @@ class Main(QWidget):
 
     def checkUpdate(self):
             print('Checking update')
-            print(githubLink)
-            githubLatestVer = githubLink.json()["name"]
-            githubLastestDownload = githubLink.json()['assets']
-            print(githubLastestDownload)
-            print("Current path: " + os.getcwd())
-            print("Current latest version: " + githubLatestVer)
-            print("Current version: " + os.environ.get('Ver'))
-            if(githubLatestVer > VER):
-                print('Using old version!')
-                print("You're currerntly using older version of Imaginary.")
-                findUpdateMsg = QMessageBox(self)
-                findUpdateMsg.setIcon(QMessageBox.Icon.Question)
-                findUpdateMsg.setWindowIcon(QIcon('src/png/icons/128.png'))
-                findUpdateMsg.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_UPDATE_FOUND_TITLE))
-                findUpdateMsg.setText(Language.getLanguageByEnum(LanguageList.MSG_UPDATE_FOUND_DESC) + githubLatestVer + Language.getLanguageByEnum(LanguageList.MSG_UPDATE_FOUND_DESC_2))
-                findUpdateMsg.setDetailedText(githubLink.json()['body'])
-                findUpdateMsg.exec()
-            elif(githubLatestVer < VER):
-                print(f"현재 개발자 버전을 사용하고 있습니다, 이 버전은 매우 불안정하며, 버그가 자주 발생합니다.")
-                usingDebugVer = QMessageBox(self)
-                usingDebugVer.setIcon(QMessageBox.Icon.Warning)
-                usingDebugVer.setWindowIcon(QIcon('src/png/icons/128.png'))
-                usingDebugVer.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_UPDATE_DEV_VERSION_TITLE))
-                usingDebugVer.setText(f'현재 {githubLatestVer} 버전보다 더 높은 버전 {VER} 을 사용하고 있습니다.\n이 버전은 매우 불안정하며, 버그가 자주 발생합니다.')
-                usingDebugVer.exec()
-            elif(githubLatestVer == VER):
-                print(f"최신버전을 사용하고 있습니다!")
+            response = requests.get("https://github.com/dontpanic-studios/imaginary/releases/latest")
+            version = response.url.split("/").pop()
+            print('\nCurrent Version: '+ VER + '\nGithub Lastest: '+ version)
+            if(version > VER):
+                print('Newer version installed, bug may appear during run status.')
+                devVersionInstalled = QMessageBox.warning(self, Language.getLanguageByEnum(LanguageList.MSG_UPDATE_DEV_VERSION_TITLE), Language.getLanguageByEnum(LanguageList.MSG_UPDATE_DEV_VERSION_DESC))
+            elif (version < VER):
+                print('Older version installed, please update imaginary for new feature and bug fixes.')
+                newVersionFound = QMessageBox.information(self, Language.getLanguageByEnum(LanguageList.MSG_UPDATE_FOUND_TITLE), Language.getLanguageByEnum(LanguageList.MSG_UPDATE_FOUND_DESC) + version + Language.getLanguageByEnum(LanguageList.MSG_UPDATE_FOUND_DESC_2))
+            else:
+                print('Unknown Version found.')
+                unknownVersionFound = QMessageBox.warning(self, Language.getLanguageByEnum(LanguageList.MSG_UPDATE_UNKNOWN_TITLE), Language.getLanguageByEnum(LanguageList.MSG_UPDATE_UNKNOWN_DESC))
 
     def eventFilter(self, source, event): # context menu (right click menu)
         if event.type() == QEvent.Type.ContextMenu and source is self.vmListView:
@@ -521,9 +502,6 @@ class Main(QWidget):
             self.imaginarySetting.move(480, 15)
         else:
             print('Dont Change Location, ENUS Detected.')    
-
-    def getWidget(name):
-        pass
 
 if __name__ == '__main__':
     Presence.connect()
