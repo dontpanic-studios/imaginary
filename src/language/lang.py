@@ -74,6 +74,7 @@ class LanguageList(Enum): # oh no
     MSG_CREATEVM_ILLIGAL_VARIABLE_TITLE = auto()
     MSG_CREATEVM_ILLIGAL_VGPU_MEM = auto()
     MSG_CREATEVM_ILLIGAL_CORE = auto()
+    MSG_VAR_PERMISSION = auto()
     MSG_CREATEVM_ILLIGAL_VGPUMEM_NOT_SUPPORTED = auto()
     MSG_CREATEVM_SLOWGPU_TITLE = auto()
     MSG_CREATEVM_SLOWGPU_DESC = auto()
@@ -84,6 +85,15 @@ class LanguageList(Enum): # oh no
     MSG_CONTEXT_DELETEVM_SUCCESS_TITLE = auto()
     MSG_CONTEXT_DELETEVM_SUCCESS_DESC = auto()
     MSG_CONTEXT_DELETEVM_SUCCESS_DESC_2 = auto()
+    DISKTOOL_TITLE = auto()
+    DISKTOOL_LABEL_DISKSIZE = auto()
+    DISKTOOL_LABEL_DISKTYPE = auto()
+    DISKTOOL_LABEL_DISKNAME = auto()
+    DISKTOOL_CREATE_DISK = auto()
+    MSG_UPDATE_UNKNOWN_TITLE = auto()
+    MSG_UPDATE_UNKNOWN_DESC = auto()
+    CREATEVM_GUEST_ARCH = auto()
+    CREATEVM_LABEL_SELECT_DISKTYPE = auto()
 
 class Language():
     def __init__(): # type: ignore

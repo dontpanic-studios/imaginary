@@ -32,14 +32,27 @@ class Host:
     :param x: x loc
     :param y: y loc
     """
-    def replaceWidget(widget, x: int, y: int):
+    def relocateWidget(widget, x: int, y: int):
         try:
             widget.move(x, y)
         except:
-            raise Exceptions.InvaildCodeInjection\
-            
+            raise Exceptions.InvaildCodeInjection
+    
+    """
+    Returing methods from Main Class
+    :return: List
+    """
     def getWidgets():
         try:
-            returned = inspect.getmembers(main.Main, predicate=inspect.ismodule)
+            returned = inspect.getmembers(main.Main, predicate=inspect.ismethod)
+            return returned
         except:
             raise Exceptions.InvaildCodeInjection
+    
+    def accessMainModule():
+        try:
+            from main import Main
+            return Main
+        except:
+            raise Exceptions.InvaildCodeInjection
+    

@@ -30,12 +30,16 @@ class EditVM(QWidget):
             self.initUI()
             self.frame1()
             log.info('initallized.')
-        except Exception:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            log.critical(f"ERROR Occurred!\nLog: {exc_type}, {exc_obj}, {exc_tb}, {fname}")
-            errInfoWinInit = QMessageBox.critical(self, '오류가 발생하였습니다.', '재설정을 하는 중에 오류가 발생했습니다.\n보통 프로그램이 꼬였거나, 저장된 위치에 한글이 들어있으면 안되는 경우가 있습니다.')
-            log.critical('failed to intiallized window')
+        except Exception as e:
+            print(f"ERROR Occurred!\nLog: \n{traceback.format_exc()}")
+            errInfoWinInit = QMessageBox(self)
+            errInfoWinInit.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_VAR_TITLE))
+            errInfoWinInit.setText(Language.getLanguageByEnum(LanguageList.MSG_VAR_DESC))
+            errInfoWinInit.setDetailedText(traceback.format_exc())
+            errInfoWinInit.setIcon(QMessageBox.Icon.Critical)
+            errInfoWinInit.exec()
+            print('failed to intiallized window')
+            exit("Program Exited cause unknown problem has been appeared.")
 
     def initUI(self):
         self.experimental_GPUType_List = ['virtio-gpu', 'qxl', 'isa-vga', 'vmware-svga', 'none', 'virtio-gpu-gl']
@@ -56,7 +60,7 @@ class EditVM(QWidget):
         self.label_RamSize = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_TITLE_LOADISO), self)
         self.label_VGAMemSize= QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_GPU_VRAM), self)
         self.label_GPUType = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_GPU_LIST), self)
-        self.label_DiskType = QLabel('Select Disk Type', self)
+        self.label_DiskType = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_SELECT_DISKTYPE), self)
         self.label_SysCoreSize = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_CPU), self)
 
         self.Input_VMName = QLineEdit(self)

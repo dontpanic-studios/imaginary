@@ -31,11 +31,15 @@ class CreateVM(QWidget):
             self.frame1()
             log.info('initallized.')
         except Exception:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            log.critical(f"ERROR Occurred!\nLog: {exc_type}, {exc_obj}, {exc_tb}, {fname}")
-            errInfoWinInit = QMessageBox.critical(self, '오류가 발생하였습니다.', '재설정을 하는 중에 오류가 발생했습니다.\n보통 프로그램이 꼬였거나, 저장된 위치에 한글이 들어있으면 안되는 경우가 있습니다.')
-            log.critical('failed to intiallized window')
+            print(f"ERROR Occurred!\nLog: \n{traceback.format_exc()}")
+            errInfoWinInit = QMessageBox(self)
+            errInfoWinInit.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_VAR_TITLE))
+            errInfoWinInit.setText(Language.getLanguageByEnum(LanguageList.MSG_VAR_DESC))
+            errInfoWinInit.setDetailedText(traceback.format_exc())
+            errInfoWinInit.setIcon(QMessageBox.Icon.Critical)
+            errInfoWinInit.exec()
+            print('failed to intiallized window')
+            exit("Program Exited cause unknown problem has been appeared.")
 
     def initUI(self):
         self.experimental_GPUType_List = ['virtio-gpu', 'qxl', 'isa-vga', 'vmware-svga', 'none', 'virtio-gpu-gl']
@@ -56,8 +60,9 @@ class CreateVM(QWidget):
         self.label_RamSize = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_TITLE_LOADISO), self)
         self.label_VGAMemSize= QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_GPU_VRAM), self)
         self.label_GPUType = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_GPU_LIST), self)
-        self.label_DiskType = QLabel('Select Disk Type', self)
+        self.label_DiskType = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_SELECT_DISKTYPE), self)
         self.label_SysCoreSize = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_CPU), self)
+        self.label_SysType = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_GUEST_ARCH), self)
 
         self.Input_VMName = QLineEdit(self)
         self.Input_VMDesc = QLineEdit(self)
@@ -142,6 +147,7 @@ class CreateVM(QWidget):
         self.Input_DiskSize.setFont(font_button)
         self.label_RamSize.setFont(font_button)
         self.Input_RamSize.setFont(font_button)
+        self.label_SysType.setFont(font_button)
         self.experimental_HAX_Accel.setFont(font_button)
         self.Input_VGAMemSize.setFont(font_button)
         self.label_VGAMemSize.setFont(font_button)
@@ -189,6 +195,7 @@ class CreateVM(QWidget):
         self.diskType_VHDX.setStyleSheet("Color : white;")
         self.Input_SysCoreSize.setStyleSheet("Color : white;")
         self.label_SysCoreSize.setStyleSheet("Color : white;")
+        self.label_SysType.setStyleSheet("Color : white;")
 
         self.label_createVM.adjustSize()
         self.label_InputLabel.adjustSize()
@@ -215,6 +222,7 @@ class CreateVM(QWidget):
         self.Input_SysCoreSize.adjustSize()
         self.label_SysCoreSize.adjustSize()
         self.experimental_isLegacy.adjustSize()
+        self.label_SysType.adjustSize()
         self.experimental_VMType.adjustSize()
 
         self.Input_VMName.setPlaceholderText('eg) Windows 11')
@@ -382,6 +390,7 @@ class CreateVM(QWidget):
         self.diskType_QCOW2.setHidden(True)
         self.diskType_VHDX.setHidden(True)
         self.diskType_RAW.setHidden(True)
+        self.label_SysType.setHidden(True)
         self.label_DiskType.setHidden(True)
         self.whybutdontcreatedisk.setHidden(True)
         self.experimental_VMType.setHidden(True)
@@ -435,6 +444,7 @@ class CreateVM(QWidget):
         self.label_RamSize.setHidden(True)
         self.experimental_HAX_Accel.setHidden(False)
         self.Input_VGAMemSize.setHidden(False)
+        self.label_SysType.setHidden(False)
         self.experimental_VMType.setHidden(False)
         self.Input_VGAMemSize.setHidden(False)
         self.label_VGAMemSize.setHidden(False)
@@ -496,7 +506,8 @@ class CreateVM(QWidget):
         self.experimental_Input_StartupArg.move(20, 395)
         self.whybutdontcreatedisk.move(20, 417) 
         self.experimental_OpenGL_Accel.move(20, 190)
-        self.experimental_VMType.move(20, 385)
+        self.experimental_VMType.move(20, 350)
+        self.label_SysType.move(20, 320)
 
         self.experimental_GPUType.resize(QSize(120, 30))
 
@@ -521,6 +532,7 @@ class CreateVM(QWidget):
         self.Input_VMDesc.setHidden(True)
         self.Input_VMName.setHidden(True)
         self.label_loadISO_title.setHidden(True)
+        self.label_SysType.setHidden(True)
         self.whybutdontcreatedisk.setHidden(False)
         self.label_InputLabel_disk.setHidden(False)
         self.Input_DiskSize.setHidden(False)

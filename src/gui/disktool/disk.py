@@ -4,6 +4,7 @@ from PyQt6 import QtCore
 from src.gui.label import whynotclick
 import os, sys, logging, subprocess, traceback
 from dotenv import load_dotenv
+from src.language.lang import Language, LanguageList
 
 log = logging
 logFilePath = './log/debug-log.log'
@@ -15,7 +16,7 @@ class DiskTool(QWidget):
         try:
             super().__init__()
 
-            self.setWindowTitle("Imaginary - Disk Tool")
+            self.setWindowTitle(Language.getLanguageByEnum(LanguageList.DISK_TOOL))
             self.setStyleSheet("background-color: #262626; Color : white;") 
             self.setWindowIcon(QIcon('./src/png/icons/128.png'))
             self.setFixedSize(640, 200)
@@ -23,22 +24,26 @@ class DiskTool(QWidget):
             self.initUI()
             log.info('initallized.')
         except Exception:
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            log.critical(f"ERROR Occurred!\nLog: {exc_type}, {exc_obj}, {exc_tb}, {fname}")
-            errInfoWinInit = QMessageBox.critical(self, '오류가 발생하였습니다.', '재설정을 하는 중에 오류가 발생했습니다.\n보통 프로그램이 꼬였거나, 저장된 위치에 한글이 들어있으면 안되는 경우가 있습니다.')
-            log.critical('failed to intiallized window')
+            print(f"ERROR Occurred!\nLog: \n{traceback.format_exc()}")
+            errInfoWinInit = QMessageBox(self)
+            errInfoWinInit.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_VAR_TITLE))
+            errInfoWinInit.setText(Language.getLanguageByEnum(LanguageList.MSG_VAR_DESC))
+            errInfoWinInit.setDetailedText(traceback.format_exc())
+            errInfoWinInit.setIcon(QMessageBox.Icon.Critical)
+            errInfoWinInit.exec()
+            print('failed to intiallized window')
+            exit("Program Exited cause unknown problem has been appeared.")
 
     def initUI(self):
         diskType = ["qcow2", "raw", "vhdx"]
 
-        self.label_InfoTitle = QLabel("Disk Tool", self)
-        self.label_DiskSize = QLabel("Disk Size", self)
-        self.label_DiskType = QLabel("Disk Type", self)
-        self.label_DiskName = QLabel("Disk Name", self)
+        self.label_InfoTitle = QLabel(Language.getLanguageByEnum(LanguageList.DISKTOOL_TITLE), self)
+        self.label_DiskSize = QLabel(Language.getLanguageByEnum(LanguageList.DISKTOOL_LABEL_DISKSIZE), self)
+        self.label_DiskType = QLabel(Language.getLanguageByEnum(LanguageList.DISKTOOL_LABEL_DISKTYPE), self)
+        self.label_DiskName = QLabel(Language.getLanguageByEnum(LanguageList.DISKTOOL_LABEL_DISKNAME), self)
 
         self.createDisk = whynotclick.Label(self)
-        self.createDisk.setText("Create Disk")
+        self.createDisk.setText(Language.getLanguageByEnum(LanguageList.DISKTOOL_CREATE_DISK))
 
         self.Input_DiskSize = QLineEdit(self)
         self.Input_DiskName = QLineEdit(self)
