@@ -107,7 +107,7 @@ class DiskTool(QWidget):
             if(fname.toString() != ''):
                     diskLoc = fname.toString()
         else:
-            msg = QMessageBox.question(self, '의문문', '디스크 생성을 취소할까요?', QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            msg = QMessageBox.question(self, Language.getLanguageByEnum(LanguageList.MSG_DISKTOOL_CANCEL_TITLE), Language.getLanguageByEnum(LanguageList.MSG_DISKTOOL_CANCEL_DESC), QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
 
             if(msg == QMessageBox.StandardButton.Yes):
                 return
@@ -118,12 +118,12 @@ class DiskTool(QWidget):
             process = subprocess.check_call(f'cd src/qemu & qemu-img create -f {self.diskTypeList.currentText()} -o size={self.Input_DiskSize.text()} "{self.Input_DiskName.text()}.img" & qemu-img info "{self.Input_DiskName.text()}.img"', shell=True)
             os.rename(f'src/qemu/{self.Input_DiskName.text()}.img', diskLoc)
             
-            msg = QMessageBox.information(self, '디스크 생성됨', f'디스크가 "{diskLoc}" 에 생성되었습니다.')
+            msg = QMessageBox.information(self, Language.getLanguageByEnum(LanguageList.MSG_DISKTOOL_CREATED_TITLE), Language.getLanguageByEnum(LanguageList.MSG_DISKTOOL_CREATED_DESC) + diskLoc + Language.getLanguageByEnum(LanguageList.MSG_DISKTOOL_CREATED_DESC_2))
         except:
             msg = QMessageBox(self)
-            msg.setWindowTitle('생성 실패')
+            msg.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_DISKTOOL_CREATE_FAILURE_TITLE))
             msg.setIcon(QMessageBox.Icon.Critical)
             msg.setWindowIcon(QIcon('src/png/icons/remove128.png'))
-            msg.setText('사용자가 지정한 디스크를 생성하는데에 실패하였습니다.\n모든 값이 올바른지 (예를 들어서 디스크 크기가 알맞지 않다던지) 확인하여 다시 생성해주세요.\n\n이와 관련되지 않는 오류는 Show Details를 확인해주세요.')
+            msg.setText(Language.getLanguageByEnum(LanguageList.MSG_DISKTOOL_CREATE_FAILURE_DESC))
             msg.setDetailedText(f'{traceback.format_exc()}')
             msg.exec()

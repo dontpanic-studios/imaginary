@@ -1,4 +1,5 @@
 import json, os, importlib
+from dotenv import load_dotenv
 from traceback import format_exc
 
 class NoPluginFound(Exception):
@@ -7,9 +8,11 @@ class NoPluginFound(Exception):
 class InvaildPluginData(Exception):
     pass
 
+load_dotenv('data/setting.env')
 loadedPlugins = []
 
 def loadPlugin():
+    if(os.environ.get('LoadPlugin') == 'True'):
         sub_folders = [name for name in os.listdir('src/plugins/') if os.path.isdir(os.path.join('src/plugins/', name))]
         try:
             for i in sub_folders:
@@ -41,6 +44,8 @@ def loadPlugin():
             raise InvaildPluginData
         
         print(f"IUPL: Injection Done, Loaded Plugin Count: {len(loadedPlugins)}")
+    else:
+        print('IUPL: Plugin Load Function disabled by user.')
 
 def getData(plname: str):
         try:

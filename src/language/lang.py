@@ -86,6 +86,8 @@ class LanguageList(Enum): # oh no
     MSG_CONTEXT_DELETEVM_SUCCESS_DESC = auto()
     MSG_CONTEXT_DELETEVM_SUCCESS_DESC_2 = auto()
     DISKTOOL_TITLE = auto()
+    MSG_IUPL_INITALLIZE_FAIL_TITLE = auto()
+    MSG_IUPL_INITALLIZE_FAIL_DESC = auto()
     DISKTOOL_LABEL_DISKSIZE = auto()
     DISKTOOL_LABEL_DISKTYPE = auto()
     DISKTOOL_LABEL_DISKNAME = auto()
@@ -93,7 +95,17 @@ class LanguageList(Enum): # oh no
     MSG_UPDATE_UNKNOWN_TITLE = auto()
     MSG_UPDATE_UNKNOWN_DESC = auto()
     CREATEVM_GUEST_ARCH = auto()
+    MSG_DISKTOOL_CANCEL_TITLE = auto()
+    MSG_DISKTOOL_CANCEL_DESC = auto()
     CREATEVM_LABEL_SELECT_DISKTYPE = auto()
+    MSG_DISKTOOL_CREATED_TITLE = auto()
+    MSG_DISKTOOL_CREATED_DESC = auto()
+    MSG_DISKTOOL_CREATED_DESC_2 = auto()
+    MSG_DISKTOOL_CREATE_FAILURE_TITLE = auto()
+    MSG_DISKTOOL_CREATE_FAILURE_DESC = auto()
+    TAB_GENERAL = auto()
+    TAB_DISK = auto()
+    TAB_ETC = auto()
 
 class Language():
     def __init__(): # type: ignore

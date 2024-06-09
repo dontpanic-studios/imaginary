@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QListView, QAbstractItemView, QMenu, QProxyStyle, QStyle
+from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QListView, QAbstractItemView, QMenu
 from PyQt6.QtGui import QIcon, QPixmap, QStandardItem, QStandardItemModel
 from PyQt6 import QtCore
 from PyQt6.QtCore import QEvent, QMimeDatabase
@@ -10,6 +10,7 @@ from src.gui.label import whynotclick
 from src.discord.intergration import Presence
 from src.gui.setting import info
 from src.support.iupl import loadPlugin, loadedPlugins
+from src.support.library.ipl_exception import Exceptions
 from src.gui.editvm import editvm
 from src.gui.disktool import disk
 from dotenv import load_dotenv
@@ -169,7 +170,7 @@ class Main(QWidget):
 
     def showEditWindow(self):
         print("Opening EditWin...")
-        self.w = editvm.EditVM(self.label_Vm_Title.text())
+        self.w = editvm.EditVM(vmname=self.label_Vm_Title.text())
         self.w.show()        
 
     def on_clicked(self, index): # load data
@@ -250,9 +251,15 @@ class Main(QWidget):
     def loadPlugins(self):
         try:
             loadPlugin()
-        except:
+        except (Exceptions.InvaildCodeInjection, Exceptions.InvaildData, Exceptions.InvaildModule, TypeError):
             print("Code Injection Failed!")
             print(f"Raise Exceptions\n{traceback.format_exc()}")
+            errInfoWinInit = QMessageBox(self)
+            errInfoWinInit.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_IUPL_INITALLIZE_FAIL_TITLE))
+            errInfoWinInit.setText(Language.getLanguageByEnum(LanguageList.MSG_IUPL_INITALLIZE_FAIL_DESC))
+            errInfoWinInit.setDetailedText(traceback.format_exc())
+            errInfoWinInit.setIcon(QMessageBox.Icon.Critical)
+            errInfoWinInit.exec()
 
     def closeEvent(self, event):
         sys.exit(0)
@@ -376,7 +383,7 @@ class Main(QWidget):
             print('Checking update')
             response = requests.get("https://github.com/dontpanic-studios/imaginary/releases/latest")
             version = response.url.split("/").pop()
-            print('\nCurrent Version: '+ VER + '\nGithub Lastest: '+ version)
+            print('Current Version: '+ VER + '\nGithub Lastest: '+ version)
             if(version > VER):
                 print('Newer version installed, bug may appear during run status.')
                 devVersionInstalled = QMessageBox.warning(self, Language.getLanguageByEnum(LanguageList.MSG_UPDATE_DEV_VERSION_TITLE), Language.getLanguageByEnum(LanguageList.MSG_UPDATE_DEV_VERSION_DESC))
