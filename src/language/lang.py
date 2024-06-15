@@ -106,6 +106,19 @@ class LanguageList(Enum): # oh no
     TAB_GENERAL = auto()
     TAB_DISK = auto()
     TAB_ETC = auto()
+    MSG_EXPORTVM_SUCCESS_TITLE = auto()
+    MSG_EXPORTVM_SUCCESS_DESC = auto()
+    MSG_EXPORTVM_FAILED_TITLE = auto()
+    MSG_EXPORTVM_FAILED_DESC = auto()
+    MSG_EXPORTVM_SUCCESS_DESC2 = auto()
+    MSG_LOADVM_SUCCESS_TITLE = auto()
+    MSG_LOADVM_SUCCESS_DESC = auto()
+    MSG_LOADVM_FAILED_TITLE = auto()
+    MSG_LOADVM_FAILED_DESC = auto()
+    MSG_QEMU_FAILED_TITLE = auto()
+    MSG_QEMU_FAILED_DESC = auto()
+    MSG_QEMU_FAILED_DESC_NOPROCESS = auto()
+    MSG_UPDATE_DEV_VERSION_DESC2 = auto()
 
 class Language():
     def __init__(): # type: ignore

@@ -8,5 +8,5 @@
         "main": "MoveWidget",
         "class": "WidgetMovement"
     },
-    "ignoreThisPlugin": false
+    "ignoreThisPlugin": true
 }

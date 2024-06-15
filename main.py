@@ -16,6 +16,8 @@ from src.gui.disktool import disk
 from dotenv import load_dotenv
 from pathlib import Path
 from fontTools.ttLib import TTFont
+from src.notification.wrapper import Notifiaction
+from pyqttoast import Toast, ToastPreset
 
 
 print('Installing Figtree Font.')
@@ -44,7 +46,6 @@ class Main(QWidget):
         print('trying initallizing main frame..')
         try:
             super().__init__()
-            self.checkUpdate()
 
             self.setWindowTitle("Imaginary")
             self.setStyleSheet("background-color: #262626; Color : white;") 
@@ -54,6 +55,7 @@ class Main(QWidget):
             self.setWindowFlags(QtCore.Qt.WindowType.WindowCloseButtonHint | QtCore.Qt.WindowType.WindowMinimizeButtonHint)
             self.setupWidget()
             self.loadPlugins()
+            self.checkUpdate()
         
             print('initallized.')
         except (Exception, TypeError, PermissionError) as e:
@@ -207,7 +209,7 @@ class Main(QWidget):
                 print(traceback.format_exc())
                 self.label_VMInfo.setText(Language.getLanguageByEnum(LanguageList.NO_METADATA_FOUND))
                 self.label_VMInfo.adjustSize()
-
+                Notifiaction.showErrorStr(LanguageList.NO_METADATA_FOUND, 'the fuck is wrong w u', 2500, True, self)
             if(data['disk']['disk_size'] != 'No Disk Avaliable'):
                 self.runVM.clicked.connect(self.runQemu)
                 self.runVM.setStyleSheet("Color : #59d97b; background-color:#2C2C2C;")
@@ -225,20 +227,18 @@ class Main(QWidget):
             #Presence.update(self, details=f'Looking up {item.text()}', large_image='star') # this mf doesn't work properly
         except (FileNotFoundError, SystemError, json.decoder.JSONDecodeError, PermissionError) as e:
             print('failed to read metadata, is file even?')    
-            failReadData = QMessageBox(self)
-            failReadData.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_TITLE))
-            failReadData.setIcon(QMessageBox.Icon.Critical)
-            failReadData.setWindowIcon(QIcon('src/png/icons/remove128.png'))
+            metadataInvaild = Toast(self)
+            metadataInvaild.setTitle(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_TITLE))
             if e == json.decoder.JSONDecodeError:
-                failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_JSON))
+                metadataInvaild.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_JSON) + '\n' + traceback.format_exc)
             elif e == SystemError:
-                failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_SYSTEM))
+                metadataInvaild.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_SYSTEM) + '\n' + traceback.format_exc())
             elif e == PermissionError:
-                failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_PERMISSION))
+                metadataInvaild.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_PERMISSION) + '\n' + traceback.format_exc)
             else:
-                failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_NOFILEFOUND))
-            failReadData.setDetailedText(f'{traceback.format_exc()}')
-            failReadData.exec()         
+                metadataInvaild.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_NOFILEFOUND) + '\n' + traceback.format_exc)
+            metadataInvaild.applyPreset(ToastPreset.ERROR_DARK)
+            metadataInvaild.show()
             return
 
     def checkIfClientModded(self):
@@ -254,12 +254,7 @@ class Main(QWidget):
         except (Exceptions.InvaildCodeInjection, Exceptions.InvaildData, Exceptions.InvaildModule, TypeError):
             print("Code Injection Failed!")
             print(f"Raise Exceptions\n{traceback.format_exc()}")
-            errInfoWinInit = QMessageBox(self)
-            errInfoWinInit.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_IUPL_INITALLIZE_FAIL_TITLE))
-            errInfoWinInit.setText(Language.getLanguageByEnum(LanguageList.MSG_IUPL_INITALLIZE_FAIL_DESC))
-            errInfoWinInit.setDetailedText(traceback.format_exc())
-            errInfoWinInit.setIcon(QMessageBox.Icon.Critical)
-            errInfoWinInit.exec()
+            Notifiaction.showError(LanguageList.MSG_IUPL_INITALLIZE_FAIL_TITLE, LanguageList.MSG_IUPL_INITALLIZE_FAIL_DESC, 2500, True, self)
 
     def closeEvent(self, event):
         sys.exit(0)
@@ -367,17 +362,11 @@ class Main(QWidget):
             except psutil.NoSuchProcess:
                 self.label_Vm_Status.setText('Status: VM Process cannot be found.')
                 self.label_Vm_Status.setStyleSheet('Color : red; background-color: #2C2C2C;') 
-                self.label_Vm_Status.adjustSize() 
+                self.label_Vm_Status.adjustSize()
+                Notifiaction.showErrorStr(LanguageList.MSG_QEMU_FAILED_TITLE, f'{Language.getLanguageByEnum(LanguageList.MSG_QEMU_FAILED_DESC_NOPROCESS)}\n{traceback.__name__}', 2500, True, self)
         except:
             print('QEMU Run Failed!')
-            trace = traceback.format_exc()
-            qemuRunFailed = QMessageBox(self)
-            qemuRunFailed.setIcon(QMessageBox.Icon.Critical)
-            qemuRunFailed.setWindowIcon(QIcon('src/png/icons/remove128.png'))
-            qemuRunFailed.setWindowTitle('QEMU 실행 실패')
-            qemuRunFailed.setText(f'QEMU 실행에 실패하였습니다.\nShow Details을 눌러 오류 사항을 확인하세요.')
-            qemuRunFailed.setDetailedText(f'Imaginary(이)가 QEMU 실행이 정상적으로 진행이 안되었다고 판단되었습니다,\n{trace}')
-            qemuRunFailed.exec()
+            Notifiaction.showErrorStr(LanguageList.MSG_QEMU_FAILED_TITLE, f'{Language.getLanguageByEnum(LanguageList.MSG_QEMU_FAILED_DESC)}\n{traceback.__name__}', 2500, True, self)
 
     def checkUpdate(self):
             print('Checking update')
@@ -386,13 +375,13 @@ class Main(QWidget):
             print('Current Version: '+ VER + '\nGithub Lastest: '+ version)
             if(version > VER):
                 print('Newer version installed, bug may appear during run status.')
-                devVersionInstalled = QMessageBox.warning(self, Language.getLanguageByEnum(LanguageList.MSG_UPDATE_DEV_VERSION_TITLE), Language.getLanguageByEnum(LanguageList.MSG_UPDATE_DEV_VERSION_DESC))
+                Notifiaction.showWarnStr(LanguageList.MSG_UPDATE_DEV_VERSION_TITLE, f'{Language.getLanguageByEnum(LanguageList.MSG_UPDATE_DEV_VERSION_DESC)} {VER} {Language.getLanguageByEnum(LanguageList.MSG_UPDATE_DEV_VERSION_DESC2)}', 2500, True, self)
             elif (version < VER):
                 print('Older version installed, please update imaginary for new feature and bug fixes.')
-                newVersionFound = QMessageBox.information(self, Language.getLanguageByEnum(LanguageList.MSG_UPDATE_FOUND_TITLE), Language.getLanguageByEnum(LanguageList.MSG_UPDATE_FOUND_DESC) + version + Language.getLanguageByEnum(LanguageList.MSG_UPDATE_FOUND_DESC_2))
+                Notifiaction.showInfoStr(LanguageList.MSG_UPDATE_FOUND_TITLE, f'{Language.getLanguageByEnum(LanguageList.MSG_UPDATE_FOUND_DESC)} {version} {Language.getLanguageByEnum(LanguageList.MSG_UPDATE_FOUND_DESC_2)}', 2500, True, self)
             else:
                 print('Unknown Version found.')
-                unknownVersionFound = QMessageBox.warning(self, Language.getLanguageByEnum(LanguageList.MSG_UPDATE_UNKNOWN_TITLE), Language.getLanguageByEnum(LanguageList.MSG_UPDATE_UNKNOWN_DESC))
+                Notifiaction.showErrorStr(LanguageList.MSG_UPDATE_UNKNOWN_TITLE, f'the fuck version u using rn', 2500, True, self)
 
     def eventFilter(self, source, event): # context menu (right click menu)
         if event.type() == QEvent.Type.ContextMenu and source is self.vmListView:
@@ -429,7 +418,7 @@ class Main(QWidget):
         if(isTrue == QMessageBox.StandardButton.Yes):
             try:
                 shutil.rmtree(f'src\\vm\\{item.text()}')
-                success = QMessageBox.information(self, Language.getLanguageByEnum(LanguageList.MSG_CONTEXT_DELETEVM_CONFIRM_TITLE), Language.getLanguageByEnum(LanguageList.MSG_CONTEXT_DELETEVM_SUCCESS_DESC) + item.text() + Language.getLanguageByEnum(LanguageList.MSG_CONTEXT_DELETEVM_SUCCESS_DESC_2))
+                Notifiaction.showSuccessStr(LanguageList.MSG_CONTEXT_DELETEVM_SUCCESS_TITLE, f'{Language.getLanguageByEnum(LanguageList.MSG_CONTEXT_DELETEVM_SUCCESS_DESC)} {item.text()} {Language.getLanguageByEnum(LanguageList.MSG_CONTEXT_DELETEVM_SUCCESS_DESC_2)}', 2500, True, self)
                 self.reloadList()
             except:
                 failed = QMessageBox(self, '삭제 이벤트 취소됨', f'가상머신 {item.text()}를 지우다가 알수없는 오류가 발생했습니다.\n자세한 내용은 Show Details.. 를 눌러 확인하세요.')
@@ -444,15 +433,9 @@ class Main(QWidget):
 
         try:
             shutil.make_archive(f'{item.text()}-exported-{date.today()}', 'zip', vmloc)
-            succ = QMessageBox.information(self, '가상머신 내보내짐', f'{item.text()} (이)가 {os.getcwd()} (으)로 내보내졌습니다.')
+            Notifiaction.showSuccessStr(LanguageList.MSG_EXPORTVM_SUCCESS_TITLE, f'{Language.getLanguageByEnum(LanguageList.MSG_EXPORTVM_SUCCESS_DESC)} {vmloc} {Language.getLanguageByEnum(LanguageList.MSG_EXPORTVM_SUCCESS_DESC2)}', 2500, True, self)
         except:
-            failed = QMessageBox(self)
-            failed.setWindowTitle('가상머신 내보내기 이벤트 취소됨')
-            failed.setWindowIcon(QIcon('src/png/icons/remove128.png'))
-            failed.setText(f'가상머신 {item.text()}를 내보내다가 알수없는 오류가 발생했습니다.\n자세한 내용은 Show Details.. 를 눌러 확인하세요.')
-            failed.setDetailedText(f'미안해요!\nImaginary(이)가 "{item.text()}" 를 zip 확장자로 내보내다가 알수없는 오류를 마주했습니다.\n\n폴더가 존재하지 않거나, 아니면 권한이 부족할수도 있습니다.\n\n{traceback.format_exc()}')
-            failed.setIcon(QMessageBox.Icon.Critical)
-            failed.exec()
+            Notifiaction.showErrorStr(LanguageList.MSG_EXPORTVM_FAILED_TITLE, f'{Language.getLanguageByEnum(LanguageList.MSG_EXPORTVM_FAILED_DESC)} {traceback.__name__}', 2500, True, self)
 
     def loadExportedVM(self, url):
         print(f'trying to unpack vm: {url}')
@@ -461,7 +444,7 @@ class Main(QWidget):
             shutil.unpack_archive(url, f'src/vm/{filename}', 'zip')
             self.reloadList()
             print('successfully loaded vm.')
-            succ = QMessageBox.information(self, '가상머신 불러와짐', f'{filename}을 성공적으로 불러왔습니다.')
+            Notifiaction.showSuccess(LanguageList.MSG_LOADVM_SUCCESS_TITLE, LanguageList.MSG_LOADVM_SUCCESS_DESC, 2500, True, self)
         except FileExistsError:
             failed = QMessageBox(self, '가상머신 불러오기 이벤트 취소됨', f'{filename}(이)가 이미 존재하여 취소하였습니다.')  
 

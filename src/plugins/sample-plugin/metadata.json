@@ -8,5 +8,5 @@
         "main": "ThemeInjection",
         "class": "ThemeInject"
     },
-    "ignoreThisPlugin": true
+    "ignoreThisPlugin": false
 }

@@ -30,6 +30,7 @@ class EditVM(QWidget):
             self.vmname = vmname
 
             self.initUI()
+            self.setData()
             log.info('initallized.')
         except Exception as e:
             print(f"ERROR Occurred!\nLog: \n{traceback.format_exc()}")
@@ -43,48 +44,59 @@ class EditVM(QWidget):
             exit("Program Exited cause unknown problem has been appeared.")
     
     def initUI(self):
-        #self.back = QLabel(self) # random background image that was used back in the day.
+        self.back = QLabel(self) # random background image that was used back in the day.
         self.label_Title = QLabel(Language.getLanguageByEnum(LanguageList.EDITVM_TITLE), self)
+
         self.btn_SaveEdited = whynotclick.Label(self)
         self.btn_SaveEdited.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_SAVE))
+        self.btn_GeneralPage = whynotclick.Label(self)
+        self.btn_GeneralPage.setText(Language.getLanguageByEnum(LanguageList.TAB_GENERAL))
+        self.btn_DiskPage = whynotclick.Label(self)
+        self.btn_DiskPage.setText(Language.getLanguageByEnum(LanguageList.TAB_DISK))
+        self.btn_EtcPage = whynotclick.Label(self)
+        self.btn_EtcPage.setText(Language.getLanguageByEnum(LanguageList.TAB_ETC))
 
-        #self.back.setPixmap(QPixmap('src/png/background/vmEditBack.png'))   
+        self.back.setPixmap(QPixmap('src/png/background/vmEditBack.png'))
 
-        self.vmEditTile = QTabWidget(self)
-        self.vmEditTile.setMovable(False)
-        self.vmEditTile.setTabPosition(QTabWidget.TabPosition.West)
+        self.pg1_label_VMName = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_VMNAME), self)
+        self.pg1_Input_VMName = QLineEdit(self)
 
-        generalPage = QWidget(self.vmEditTile)
-        generalPageLayout = QFormLayout()
-        generalPageLayout.addRow('VM Name', QLineEdit(self.loadData()['vm_name'], self))
+        self.font_bold_title = self.label_Title.font()
+        self.font_bold_title.setBold(True)
+        self.font_bold_title.setPointSize(26)
+        self.font_bold_title.setFamily(os.environ.get('Font'))
 
-        generalPage.setLayout(generalPageLayout)
+        self.font_normal = self.label_Title.font()
+        self.font_normal.setBold(True)
+        self.font_normal.setPointSize(15)
+        self.font_normal.setFamily(os.environ.get('Font'))
 
-        self.vmEditTile.addTab(generalPage, Language.getLanguageByEnum(LanguageList.TAB_GENERAL))
-
-        font_bold_title = self.label_Title.font()
-        font_bold_title.setBold(True)
-        font_bold_title.setPointSize(26)
-        font_bold_title.setFamily(os.environ.get('Font'))
-
-        font_normal = self.label_Title.font()
-        font_normal.setBold(True)
-        font_normal.setPointSize(15)
-        font_normal.setFamily(os.environ.get('Font'))
-
-        font_button = self.label_Title.font()
-        font_button.setBold(True)
-        font_button.setPointSize(20)
-        font_button.setFamily(os.environ.get('Font'))
+        self.font_button = self.label_Title.font()
+        self.font_button.setBold(True)
+        self.font_button.setPointSize(20)
+        self.font_button.setFamily(os.environ.get('Font'))
 
         self.label_Title.move(20, 13)
-        self.label_Title.setFont(font_bold_title)
-        #self.back.move(20, 60)
-        self.btn_SaveEdited.move(535, 413)
-        self.btn_SaveEdited.setFont(font_button)
+        self.label_Title.setFont(self.font_bold_title)
+        self.back.move(20, 90)
+        self.btn_SaveEdited.move(545, 435)
+        self.btn_SaveEdited.setFont(self.font_button)
         self.btn_SaveEdited.setStyleSheet("Color : white; background-color: None;")
-        self.vmEditTile.setStyleSheet("background-color: #262626")
-        self.vmEditTile.move(20, 60)
+        self.btn_GeneralPage.move(20, 55)
+        self.btn_GeneralPage.setFont(self.font_normal)
+        self.btn_DiskPage.move(110, 55)
+        self.btn_DiskPage.setFont(self.font_normal)
+        self.btn_EtcPage.move(165, 55)
+        self.btn_EtcPage.setFont(self.font_normal)
+        self.pg1_label_VMName.setFont(self.font_normal)
+        self.pg1_label_VMName.move(25, 95)
+        self.pg1_Input_VMName.setFont(self.font_normal)
+        self.pg1_Input_VMName.move(25, 105)
+
+        self.back.resize(600, 340)
+
+    def setData(self):
+        self.pg1_Input_VMName.setText(self.loadData()['vm_name'])
 
     def loadData(self):
         try:

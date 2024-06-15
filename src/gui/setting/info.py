@@ -41,10 +41,10 @@ class CreateVM(QWidget):
         self.enableLabSetting = QComboBox(self)
         self.enableLabSetting.addItems(self.languages)
 
-        font_bold_title = self.label_InfoTitle.font()
-        font_bold_title.setBold(True)
-        font_bold_title.setPointSize(30)
-        font_bold_title.setFamily(os.environ.get('Font'))
+        self.font_bold_title = self.label_InfoTitle.font()
+        self.font_bold_title.setBold(True)
+        self.font_bold_title.setPointSize(30)
+        self.font_bold_title.setFamily(os.environ.get('Font'))
 
         self.font_bold = self.label_InfoTitle.font()
         self.font_bold.setBold(True)
@@ -62,7 +62,7 @@ class CreateVM(QWidget):
         self.label_Version.move(150, 65)
         self.enableLabSetting.move(15, 150)
 
-        self.label_InfoTitle.setFont(font_bold_title)
+        self.label_InfoTitle.setFont(self.font_bold_title)
         self.label_InfoTitle.setStyleSheet("Color : white; background-color: #262626;")
         self.label_Version.setFont(self.font_bold)
         self.label_Version.setStyleSheet("Color : white; background-color: #262626;")
