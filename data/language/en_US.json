@@ -35,6 +35,7 @@
     "CREATEVM_DRIVER_DISK": "Add Driver disk to Guest",
     "CREATEVM_NO_DISK": "Disk does not exists",
     "CREATEVM_LABEL_RAM": "Virtual Memory",
+    "CREATEVM_LABEL_RAM2": "RAM Size",
     "CREATEVM_GUEST_ARCH": "Select Guest Architecture",
     "CREATEVM_LABEL_CPU": "Virtual CPU Core",
     "CREATEVM_LABEL_GPU_VRAM": "VGPU Memory (Mb)",
@@ -45,14 +46,19 @@
     "CREATEVM_SAVE": "Save",
     "CREATEVM_BACK": "Back",
 
-    "EDITVM_TITLE": "Edit ",
+    "EDITVM_TITLE": "Edit VM",
 
     "DISKTOOL_TITLE": "Disk Tool",
     "DISKTOOL_LABEL_DISKSIZE": "Disk Size",
     "DISKTOOL_LABEL_DISKTYPE": "Disk Type",
     "DISKTOOL_LABEL_DISKNAME": "Disk Name",
     "DISKTOOL_CREATE_DISK": "Create Disk",
+
+    "TAB_GENERAL": "General",
+    "TAB_DISK": "Disk",
+    "TAB_ETC": "Etc",
     
+    "MSG_METADATA_UNKNOWN": "Unknown Metadata has been found, is file vaild?",
     "MSG_VAR_TITLE": "Unknown Error Occurred",
     "MSG_VAR_DESC": "Imaginary found out that an unknown error occurred while startup process\n\nUsually this happens if Imaginary's project folder location contains non-utf8 encoding folder or, some serious problem happened.\n\nRead Show Details.. for more information.",
     "MSG_VAR_PERMISSION": "Imaginary does not have permission to read the language file.\nPlease run as Administractor to continue.",
@@ -73,6 +79,8 @@
     "MSG_CREATEVM_ILLIGAL_VARIABLE_TITLE": "Illigal Setting Found",
     "MSG_CREATEVM_ILLIGAL_VGPU_MEM": "'GPU Memory (Mb)' must be numeric Type",
     "MSG_CREATEVM_ILLIGAL_CORE": "'Max Core' must be numeric Type",
+    "MSG_CREATEVM_SLOWGPU_TITLE": "Using Slow V-GPU",
+    "MSG_CREATEVM_SLOWGPU_DESC": "You have selected legacy V-GPU type than virtio-gpu.\nPerformance may slow down.",
 
     "MSG_MAIN_METADATA_FAILED_TITLE": "Read Failed",
     "MSG_MAIN_METADATA_FAILED_JSON": "Cannot Read VM Metadata file.\n\nJSON Decoding Error, Imaginary cannot read this JSON Format.",
@@ -80,6 +88,8 @@
     "MSG_MAIN_METADATA_FAILED_PERMISSION": "Cannot Read VM Metadata file.\n\nNo Permission, Imaginary does not have permission to read metadata.",
     "MSG_MAIN_METADATA_FAILED_SYSTEM": "Cannot Read VM Metadata file.\n\nSystemError, An error occurred in the system.",
     "MSG_MAIN_METADATA_FAILED_INCOMPATIBLE": "Cannot Read VM Metadata file.\n\nIncompatible File Format, Imaginary can only read ZIP and JSON.",
+    "MSG_MAIN_LIST_RELOADED_TITLE": "List Reloaded",
+    "MSG_MAIN_LIST_RELOADED_DESC": "VM List has been reloaded",
 
     "MSG_UPDATE_FOUND_TITLE": "Update found",
     "MSG_UPDATE_FOUND_DESC": "Found new version ",
@@ -103,7 +113,32 @@
     "MSG_CONTEXT_DELETEVM_SUCCESS_TITLE": "Deleted",
     "MSG_CONTEXT_DELETEVM_SUCCESS_DESC": "Successfully deleted ",
     "MSG_CONTEXT_DELETEVM_SUCCESS_DESC_2": "",
+    "MSG_CONTEXT_DELETEVM_FAILED_TITLE": "VM Delete process failed",
+    "MSG_CONTEXT_DELETEVM_FAILED_DESC": "Does Imaginary has permission to do that?",
+
+    "MSG_EXPORTVM_SUCCESS_TITLE": "VM Exported",
+    "MSG_EXPORTVM_SUCCESS_DESC": "The VM has been exported to ",
+    "MSG_EXPORTVM_SUCCESS_DESC2": "",
+    "MSG_EXPORTVM_FAILED_TITLE": "Export Failed",
+    "MSG_EXPORTVM_FAILED_DESC": "Unknown Error has occurred, \n",
+
+    "MSG_LOADVM_SUCCESS_TITLE": "VM Loaded",
+    "MSG_LOADVM_SUCCESS_DESC": "",
+    "MSG_LOADVM_FAILED_TITLE": "VM Load Event Canceled",
+    "MSG_LOADVM_FAILED_DESC": "VM Already Exists",
+
+    "MSG_QEMU_FAILED_TITLE": "Qemu Failed",
+    "MSG_QEMU_FAILED_DESC": "Unknown Error has occurred\n",
+    "MSG_QEMU_FAILED_DESC_NOPROCESS": "No Such Process has been found.",
+
+    "MSG_DISKTOOL_CANCEL_TITLE": "Cancel?",
+    "MSG_DISKTOOL_CANCEL_DESC": "Cancel Creating New Disk?",
+    "MSG_DISKTOOL_CREATED_TITLE": "Created",
+    "MSG_DISKTOOL_CREATED_DESC": "Disk Created at ",
+    "MSG_DISKTOOL_CREATED_DESC_2": "",
+    "MSG_DISKTOOL_CREATE_FAILURE_TITLE": "Creation Failed",
+    "MSG_DISKTOOL_CREATE_FAILURE_DESC": "Imaginary Failed to create new disk,\nPlease check that every option is at vaild format.\n\nCheck Show Details.. for more information.",
 
     "MSG_IUPL_INITALLIZE_FAIL_TITLE": "IUPL Initallizing failed",
-    "MSG_IUPL_INITALLIZE_FAIL_DESC": "Plugin code injection failed, please contact plugin writer."
+    "MSG_IUPL_INITALLIZE_FAIL_DESC": "Plugin code injection failed, please contact plugin developer."
 }

@@ -44,7 +44,7 @@
     "CREATEVM_SAVE": "저장",
     "CREATEVM_BACK": "이전",
 
-    "EDITVM_TITLE": " 수정하기",
+    "EDITVM_TITLE": "가상머신 수정하기",
 
     "DISKTOOL_TITLE": "디스크 도구",
     "DISKTOOL_LABEL_DISKSIZE": "디스크 크기",
@@ -52,6 +52,11 @@
     "DISKTOOL_LABEL_DISKNAME": "디스크 이름",
     "DISKTOOL_CREATE_DISK": "디스크 만들기",
 
+    "TAB_GENERAL": "일반",
+    "TAB_DISK": "디스크",
+    "TAB_ETC": "기타",
+
+    "MSG_METADATA_UNKNOWN": "알수없는 정보를 발견했습니다, 파일이 유효한가요?",
     "MSG_VAR_TITLE": "알수없는 오류 발생",
     "MSG_VAR_DESC": "Imaginary가 알수없는 오류가 부딛쳤습니다,\n\n이러한 오류가 발생하는 경우는 Imaginary가 있는 위치의 폴더 이름이 알수없는 UTF-8 포맷으로 되어있거나,\n아니면 심각한 오류가 발생했을때 발생합니다.\n\nShow Details.. 를 보아 자세한 정보를 확인하세요.",
     "MSG_VAR_PERMISSION": "Imaginary가 언어 파일을 읽는데 권한이 부족합니다, 관리자 권한으로 실행해주세요.",
@@ -80,7 +85,9 @@
     "MSG_MAIN_METADATA_FAILED_SYSTEM": "가상머신 정보를 읽는데 실패하였습니다.\n\nSystemError, 시스템 상으로 오류가 발생했습니다.",
     "MSG_MAIN_METADATA_FAILED_INCOMPATIBLE": "가상머신 정보를 읽는데 실패하였습니다.\n\nIncompatible file format, Imaginary는 ZIP와, JSON 포맷만을 지원합니다.",
     "MSG_MAIN_EXPORTED_TITLE": "가상머신 내보내짐",
-    "MSG_MAIN_EXPORTED_DESC" : " (이)가  내보내졌습니다.",
+    "MSG_MAIN_EXPORTED_DESC" : " (이)가  내보내졌습니다.",   
+    "MSG_MAIN_LIST_RELOADED_TITLE": "리스트 불러와짐",
+    "MSG_MAIN_LIST_RELOADED_DESC": "가상머신 리스트가 다시 불러와졌습니다",
 
     "MSG_UPDATE_FOUND_TITLE": "업데이트 발견",
     "MSG_UPDATE_FOUND_DESC": "새로운 버전 ",
@@ -90,6 +97,24 @@
     "MSG_UPDATE_DEV_VERSION_DESC2": " 버전보다 더 높은 버전을 사용하고 있습니다,\n이 버전은 매우 불안정하며, 버그가 자주 발생합니다.",
     "MSG_UPDATE_UNKNOWN_TITLE": "알수 없는 버전",
     "MSG_UPDATE_UNKNOWN_DESC": "Imaginary가 알수 없는 버전을 확인했습니다, 정말로 이 버전을 쓰실건가요?",
+
+    "MSG_EXPORTVM_SUCCESS_TITLE": "가상머신 내보내짐",
+    "MSG_EXPORTVM_SUCCESS_DESC": "가상머신이 ",
+    "MSG_EXPORTVM_SUCCESS_DESC2": " 위치로 내보내졌습니다.",
+    "MSG_EXPORTVM_FAILED_TITLE": "내보내기 실패",
+    "MSG_EXPORTVM_FAILED_DESC": "알수없는 오류가 발생했습니다, 권한이 부족한가요?",
+
+    "MSG_DELETEVM_FAILED_TITLE": "가상머신 삭제 실패",
+    "MSG_DELETEVM_FAILED_DESC": "알수없는 오류가 발생했습니다, 권한이 충분한가요?",
+
+    "MSG_LOADVM_SUCCESS_TITLE": "VM Loaded",
+    "MSG_LOADVM_SUCCESS_DESC": "",
+    "MSG_LOADVM_FAILED_TITLE": "VM Load Event Canceled",
+    "MSG_LOADVM_FAILED_DESC": "VM Already Exists",
+
+    "MSG_QEMU_FAILED_TITLE": "Qemu Failed",
+    "MSG_QEMU_FAILED_DESC": "Unknown Error has occurred\n",
+    "MSG_QEMU_FAILED_DESC_NOPROCESS": "No Such Process has been found.",
 
     "MSG_INFO_LANGUAGE_SAVED_TITLE": "언어 저장됨",
     "MSG_INFO_LANGUAGE_SAVED_DESC": "프로그램을 재시작하여 언어 변경을 완료하세요.",
@@ -104,6 +129,16 @@
     "MSG_CONTEXT_DELETEVM_SUCCESS_TITLE": "삭제됨",
     "MSG_CONTEXT_DELETEVM_SUCCESS_DESC": "성공적으로 ",
     "MSG_CONTEXT_DELETEVM_SUCCESS_DESC_2": "을 지웠습니다.",
+    "MSG_CONTEXT_DELETEVM_FAILED_TITLE": "삭제 실패",
+    "MSG_CONTEXT_DELETEVM_FAILED_DESC": "알수없는 오류가 발생했습니다, 권한이 충분한가요?",
+
+    "MSG_DISKTOOL_CANCEL_TITLE": "취소할까요?",
+    "MSG_DISKTOOL_CANCEL_DESC": "디스크 생성을 취소할까요?",
+    "MSG_DISKTOOL_CREATED_TITLE": "디스크 생성됨",
+    "MSG_DISKTOOL_CREATED_DESC": "디스크가 ",
+    "MSG_DISKTOOL_CREATED_DESC_2": " 에 생성되었습니다.",
+    "MSG_DISKTOOL_CREATE_FAILURE_TITLE": "생성 실패",
+    "MSG_DISKTOOL_CREATE_FAILURE_DESC": "사용자가 지정한 디스크를 생성하는데에 실패하였습니다.\n모든 값이 올바른지 (예를 들어서 디스크 크기가 알맞지 않다던지) 확인하여 다시 생성해주세요.\n\n이와 관련되지 않는 오류는 Show Details를 확인해주세요.",
 
     "MSG_IUPL_INITALLIZE_FAIL_TITLE": "IUPL 재설정 실패",
     "MSG_IUPL_INITALLIZE_FAIL_DESC": "플러그인 코드 인젝션 과정이 실패하였습니다, 플러그인 제작자를 연락해주십시오."

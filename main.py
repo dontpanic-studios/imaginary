@@ -85,7 +85,7 @@ class Main(QWidget):
         self.label_LoadedPlugins = QLabel(text=Language.getLanguageByEnum(LanguageList.MAIN_LOADEDPLUGINS) + str(loadedPlugins.copy()), parent=self)
 
         # image
-        self.vm_background.setPixmap(QPixmap('src/png/background/bg1.png'))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+        self.vm_background.setPixmap(QPixmap('src/png/background/bg1.png'))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
 
         # button
         self.createVM = whynotclick.Label(self)
@@ -125,7 +125,7 @@ class Main(QWidget):
         self.font_button.setFamily(os.environ.get('Font'))
 
         # widget move
-        self.label_Title.move(15, 13)
+        self.label_Title.move(20, 13)
         self.label_Vm_Title.move(350, 75)
         self.vm_background.move(320, 50)
         self.label_Vm_Desc.move(352, 120)
@@ -209,7 +209,7 @@ class Main(QWidget):
                 print(traceback.format_exc())
                 self.label_VMInfo.setText(Language.getLanguageByEnum(LanguageList.NO_METADATA_FOUND))
                 self.label_VMInfo.adjustSize()
-                Notifiaction.showErrorStr(LanguageList.NO_METADATA_FOUND, 'the fuck is wrong w u', 2500, True, self)
+                Notifiaction.showErrorStr(LanguageList.NO_METADATA_FOUND, LanguageList.MSG_METADATA_UNKNOWN, 2500, True, self)
             if(data['disk']['disk_size'] != 'No Disk Avaliable'):
                 self.runVM.clicked.connect(self.runQemu)
                 self.runVM.setStyleSheet("Color : #59d97b; background-color:#2C2C2C;")
@@ -307,14 +307,18 @@ class Main(QWidget):
                     if len(self.sub_folders) > 0:
                         self.label_Vm_Title.setText(Language.getLanguageByEnum(LanguageList.SELECT_VM))
                         self.label_Vm_Desc.setText(Language.getLanguageByEnum(LanguageList.SELECT_VM))
+                        self.label_VMInfo.setText(Language.getLanguageByEnum(LanguageList.NO_METADATA_FOUND))
                         self.label_Vm_Title.adjustSize()
                         self.label_Vm_Desc.adjustSize()
+                        self.label_VMInfo.adjustSize()
                     else:
                         self.label_Vm_Desc.adjustSize()
                         self.label_Vm_Title.adjustSize()
                         print('No VM(s) has been found, ignoring it.')  
                 else:
                     print('driver folder found, ignoring.')
+            print('list loaded')
+            Notifiaction.showSuccess(LanguageList.MSG_MAIN_LIST_RELOADED_TITLE, LanguageList.MSG_MAIN_LIST_RELOADED_DESC, 2500, True, self)
         except (FileNotFoundError, SystemError, json.decoder.JSONDecodeError, PermissionError) as e:
             print('failed to read metadata, is file even?')    
             failReadData = QMessageBox(self)
@@ -399,14 +403,7 @@ class Main(QWidget):
                 elif action == export_vm:
                     self.exportVM(index)    
             except:
-                trace = traceback.format_exc()
-                qemuRunFailed = QMessageBox(self)
-                qemuRunFailed.setIcon(QMessageBox.Icon.Critical)
-                qemuRunFailed.setWindowIcon(QIcon('src/png/icons/remove128.png'))
-                qemuRunFailed.setWindowTitle('알수없는 오류 발생')
-                qemuRunFailed.setText(f'가상머신을 삭제하는데 실패하였습니다.\nShow Details을 눌러 오류 사항을 확인하세요.')
-                qemuRunFailed.setDetailedText(f'Imaginary(이)가 가상머신 삭제(이)가 정상적으로 진행이 안되었다고 판단되었습니다, 다음은 관련된 오류내용입니다.\n{trace}')
-                qemuRunFailed.exec()  
+                Notifiaction.showError(LanguageList.MSG_VAR_TITLE, LanguageList.MSG_VAR_DESC, 2500, True, self)
             return True
         
         return super().eventFilter(source, event)
@@ -421,9 +418,7 @@ class Main(QWidget):
                 Notifiaction.showSuccessStr(LanguageList.MSG_CONTEXT_DELETEVM_SUCCESS_TITLE, f'{Language.getLanguageByEnum(LanguageList.MSG_CONTEXT_DELETEVM_SUCCESS_DESC)} {item.text()} {Language.getLanguageByEnum(LanguageList.MSG_CONTEXT_DELETEVM_SUCCESS_DESC_2)}', 2500, True, self)
                 self.reloadList()
             except:
-                failed = QMessageBox(self, '삭제 이벤트 취소됨', f'가상머신 {item.text()}를 지우다가 알수없는 오류가 발생했습니다.\n자세한 내용은 Show Details.. 를 눌러 확인하세요.')
-                failed.setDetailedText(f'미안해요!\nImaginary(이)가 폴더 "{item.text()}" 를 지우다가 알수없는 오류를 마주했습니다.\n\n폴더가 존재하지 않거나, 아니면 권한이 부족할수도 있습니다.')
-                failed.setIcon(QMessageBox.Icon.Critical)
+                Notifiaction.showError(LanguageList.MSG_CONTEXT_DELETEVM_FAILED_TITLE, LanguageList.MSG_CONTEXT_DELETEVM_FAILED_DESC, 2500, True, self)
         else:
             print('ignoring.')
 
@@ -446,7 +441,7 @@ class Main(QWidget):
             print('successfully loaded vm.')
             Notifiaction.showSuccess(LanguageList.MSG_LOADVM_SUCCESS_TITLE, LanguageList.MSG_LOADVM_SUCCESS_DESC, 2500, True, self)
         except FileExistsError:
-            failed = QMessageBox(self, '가상머신 불러오기 이벤트 취소됨', f'{filename}(이)가 이미 존재하여 취소하였습니다.')  
+            Notifiaction.showWarn(LanguageList.MSG_LOADVM_FAILED_TITLE, LanguageList.MSG_LOADVM_FAILED_DESC, 2500, True, self)
 
     def dragEnterEvent(self, event):
         if self.findExportedZip(event.mimeData()):
@@ -477,7 +472,7 @@ class Main(QWidget):
             if mimetype.name() == "application/zip":
                 urls.append(url)
             else:
-                fileNotCompatible = QMessageBox.warning(self, Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_TITLE), Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_INCOMPATIBLE))
+                Notifiaction.showError(LanguageList.MSG_MAIN_METADATA_FAILED_TITLE, LanguageList.MSG_MAIN_METADATA_FAILED_INCOMPATIBLE, 2500, True, self)
         return urls  
 
     def showDiskToolWindow(self):
