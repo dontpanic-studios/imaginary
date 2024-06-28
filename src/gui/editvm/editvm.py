@@ -1,13 +1,11 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QTabWidget, QFormLayout, QLineEdit
+from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QLineEdit
 from PyQt6.QtGui import QIcon, QPixmap
 from PyQt6 import QtCore
-from PyQt6.QtCore import QSize
 from src.gui.label import whynotclick
 import os, logging, traceback, json
 from dotenv import load_dotenv
 from src.language.lang import LanguageList
 from src.language.lang import Language
-from difflib import SequenceMatcher
 
 log = logging
 logFilePath = './log/debug-log.log'
@@ -28,9 +26,12 @@ class EditVM(QWidget):
             self.setFixedSize(self.width, self.height)
             self.setWindowFlags(QtCore.Qt.WindowType.WindowCloseButtonHint | QtCore.Qt.WindowType.WindowMinimizeButtonHint)
             self.vmname = vmname
+            self.pageList = [1, 2, 3]
+            self.curPage = 1
 
             self.initUI()
             self.setData()
+            self.setupKR()
             log.info('initallized.')
         except Exception as e:
             print(f"ERROR Occurred!\nLog: \n{traceback.format_exc()}")
@@ -58,8 +59,18 @@ class EditVM(QWidget):
 
         self.back.setPixmap(QPixmap('src/png/background/vmEditBack.png'))
 
+        # general page
         self.pg1_label_VMName = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_VMNAME), self)
         self.pg1_Input_VMName = QLineEdit(self)
+        self.pg1_label_VMDesc = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_VMDESC), self)
+        self.pg1_Input_VMDesc = QLineEdit(self)
+        self.pg1_label_RamSize = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_RAM), self)
+        self.pg1_Input_RamSize = QLineEdit(self)
+        self.pg1_label_ISOLoc = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_TITLE_LOADISO), self)
+        self.pg1_btn_ISOLoc = whynotclick.Label(self)
+        self.pg1_btn_ISOLoc.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_LOADISO))
+        self.pg1_lable_CPUSize = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_CPU), self)
+        self.pg1_Input_CPUSize = QLineEdit(self)
 
         self.font_bold_title = self.label_Title.font()
         self.font_bold_title.setBold(True)
@@ -89,14 +100,41 @@ class EditVM(QWidget):
         self.btn_EtcPage.move(165, 55)
         self.btn_EtcPage.setFont(self.font_normal)
         self.pg1_label_VMName.setFont(self.font_normal)
-        self.pg1_label_VMName.move(25, 95)
+        self.pg1_label_VMName.move(35, 100)
+        self.pg1_label_VMDesc.setStyleSheet("Color : white; background-color: None;")
+        self.pg1_label_VMName.setStyleSheet("Color : white; background-color: None;")
+        self.pg1_label_RamSize.setStyleSheet("Color : white; background-color: None;")
         self.pg1_Input_VMName.setFont(self.font_normal)
-        self.pg1_Input_VMName.move(25, 105)
+        self.pg1_Input_VMName.move(35, 130)
+        self.pg1_label_VMDesc.setFont(self.font_normal)
+        self.pg1_label_VMDesc.move(350, 100)
+        self.pg1_Input_VMDesc.setFont(self.font_normal)
+        self.pg1_Input_VMDesc.move(350, 130)
+        self.pg1_label_RamSize.setFont(self.font_normal)
+        self.pg1_Input_RamSize.setFont(self.font_normal)
+        self.pg1_Input_RamSize.move(35, 210)
+        self.pg1_label_RamSize.move(35, 180)
+        self.pg1_btn_ISOLoc.setStyleSheet("Color : #4aa4ff; background-color: None;")
+        self.pg1_label_ISOLoc.setStyleSheet("Color : white; background-color: None;")
+        self.pg1_btn_ISOLoc.setFont(self.font_normal)
+        self.pg1_label_ISOLoc.setFont(self.font_normal)
+        self.pg1_label_ISOLoc.move(35, 290)
+        self.pg1_btn_ISOLoc.move(35, 310)
+        self.pg1_Input_CPUSize.setFont(self.font_normal)
+        self.pg1_lable_CPUSize.setFont(self.font_normal)
+        self.pg1_lable_CPUSize.setStyleSheet("Color : white; background-color : None;")
+        self.pg1_lable_CPUSize.move(350, 180)
+        self.pg1_Input_CPUSize.move(350, 210)
 
         self.back.resize(600, 340)
 
     def setData(self):
         self.pg1_Input_VMName.setText(self.loadData()['vm_name'])
+        self.pg1_Input_VMDesc.setText(self.loadData()['desc'])
+        self.pg1_Input_RamSize.setText(self.loadData()['max_mem'])
+        self.pg1_btn_ISOLoc.setText(self.loadData()['iso_loc'])
+        self.pg1_btn_ISOLoc.adjustSize()
+        self.pg1_Input_CPUSize.setText(self.loadData()['max_core'])
 
     def loadData(self):
         try:
@@ -105,3 +143,9 @@ class EditVM(QWidget):
         except (json.JSONDecodeError, PermissionError, SystemError):
             jsonDecodingError = QMessageBox.critical(self, Language.getLanguageByEnum(LanguageList.MSG_VAR_TITLE), Language.getLanguageByEnum(LanguageList.MSG_VAR_DESC))
     
+    def setupKR(self):
+        if(os.environ.get('Language') == 'ko_KR'):
+            print('KR Lang Detected, Moving.')
+            self.btn_DiskPage.move(80, 55)
+        else:
+            print('en_US found, ignoring.')

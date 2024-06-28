@@ -106,6 +106,7 @@ class LanguageList(Enum): # oh no
     TAB_GENERAL = auto()
     TAB_DISK = auto()
     TAB_ETC = auto()
+    MSG_METADATA_UNKNOWN = auto()
     MSG_EXPORTVM_SUCCESS_TITLE = auto()
     MSG_EXPORTVM_SUCCESS_DESC = auto()
     MSG_EXPORTVM_FAILED_TITLE = auto()
@@ -119,6 +120,10 @@ class LanguageList(Enum): # oh no
     MSG_QEMU_FAILED_DESC = auto()
     MSG_QEMU_FAILED_DESC_NOPROCESS = auto()
     MSG_UPDATE_DEV_VERSION_DESC2 = auto()
+    MSG_CONTEXT_DELETEVM_FAILED_TITLE = auto()
+    MSG_CONTEXT_DELETEVM_FAILED_DESC = auto()
+    MSG_MAIN_LIST_RELOADED_TITLE = auto()
+    MSG_MAIN_LIST_RELOADED_DESC = auto()
 
 class Language():
     def __init__(): # type: ignore
