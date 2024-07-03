@@ -253,7 +253,8 @@ class CreateVM(QWidget):
             'disk': {
                 'disk_size': self.Input_DiskSize.text(),
                 'disk_loc': f'.\\src\\vm\\{self.Input_VMName.text()}\\{self.Input_VMName.text()}.img',
-                'disk_type': ''
+                'disk_type': '',
+                'is_primary': True,
             },
             'project': f'.\\src\\vm\\{self.Input_VMName.text()}',
             'snapshot': f'.\\src\\vm\\{self.Input_VMName.text()}\\snapshot.png',
@@ -273,7 +274,16 @@ class CreateVM(QWidget):
             },
             'isLegacyMode': self.experimental_isLegacy.isChecked()
         }
-        print(f'vm setting: \n{metadata}')
+        diskdump = {
+            self.Input_VMName.text(): {
+                'disk_size': self.Input_DiskSize.text(),
+                'disk_loc': f'.\\src\\vm\\{self.Input_VMName.text()}\\{self.Input_VMName.text()}.img',
+                'disk_type': '',
+                'disk_name': self.Input_VMName.text(),
+                'is_primary': True,
+            }
+        }
+        print(f'vm setting: \n{metadata}\ndisk dump setting: \n{diskdump}')
 
         if metadata['isaccel']['bool'] == True:
             msg = QMessageBox.warning(self, Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_TITLE_TCG_ON), Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_DESC_TCG_ON))
@@ -294,10 +304,13 @@ class CreateVM(QWidget):
         
         if self.diskType_QCOW2.isChecked():
             metadata['disk']['disk_type'] = 'qcow2'
+            diskdump[self.Input_VMName.text()]['disk_type'] = 'qcow2'
         elif self.diskType_RAW.isChecked():
             metadata['disk']['disk_type'] = 'raw' 
+            diskdump[self.Input_VMName.text()]['disk_type'] = 'raw'
         elif self.diskType_VHDX.isChecked():
-            metadata['disk']['disk_type'] = 'vhdx'  
+            metadata['disk']['disk_type'] = 'vhdx'
+            diskdump[self.Input_VMName.text()]['disk_type'] = 'vhdx'  
         if self.experimental_OpenGL_Accel.isChecked() == True:
             metadata['addition']['args'] = self.experimental_Input_StartupArg.text() + ' -hdb fat:rw:src/vm/drivers/' 
         if not os.path.exists(f'src/vm/{metadata['vm_name']}'):
@@ -330,6 +343,7 @@ class CreateVM(QWidget):
                     if(metadata['vm_type'] == 'mac'):
                         warnMacNoAccel = QMessageBox.warning(self, Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_TITLE_MACOS_WARN), Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_DESC_MACOS_WARN))
 
+                    metadata['disk']['disk_list'] = diskdump
                     json.dump(metadata, f, indent=3, sort_keys=True)
                     f.close()    
                     self.close()

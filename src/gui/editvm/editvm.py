@@ -1,11 +1,12 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QLineEdit
-from PyQt6.QtGui import QIcon, QPixmap
+from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QLineEdit, QListView
+from PyQt6.QtGui import QIcon, QPixmap, QStandardItemModel, QStandardItem
 from PyQt6 import QtCore
 from src.gui.label import whynotclick
 import os, logging, traceback, json
 from dotenv import load_dotenv
 from src.language.lang import LanguageList
 from src.language.lang import Language
+from src.notification.wrapper import Notifiaction
 
 log = logging
 logFilePath = './log/debug-log.log'
@@ -32,6 +33,7 @@ class EditVM(QWidget):
             self.initUI()
             self.setData()
             self.setupKR()
+            self.page1()
             log.info('initallized.')
         except Exception as e:
             print(f"ERROR Occurred!\nLog: \n{traceback.format_exc()}")
@@ -71,6 +73,12 @@ class EditVM(QWidget):
         self.pg1_btn_ISOLoc.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_LOADISO))
         self.pg1_lable_CPUSize = QLabel(Language.getLanguageByEnum(LanguageList.CREATEVM_LABEL_CPU), self)
         self.pg1_Input_CPUSize = QLineEdit(self)
+
+        # disk page
+        self.pg2_diskListView = QListView(self)
+        self.model = QStandardItemModel()
+        self.reloadDiskList()
+        self.pg2_diskListView.setStyleSheet("border : 2px solid black;")
 
         self.font_bold_title = self.label_Title.font()
         self.font_bold_title.setBold(True)
@@ -125,10 +133,15 @@ class EditVM(QWidget):
         self.pg1_lable_CPUSize.setStyleSheet("Color : white; background-color : None;")
         self.pg1_lable_CPUSize.move(350, 180)
         self.pg1_Input_CPUSize.move(350, 210)
+        self.pg2_diskListView.setFont(self.font_normal)
+        self.pg2_diskListView.setStyleSheet("Color : white; background-color: None;")
+        self.pg2_diskListView.move(20, 90)
+        self.pg2_diskListView.resize(165, 340)
 
         self.back.resize(600, 340)
 
     def setData(self):
+        # page 1 - general
         self.pg1_Input_VMName.setText(self.loadData()['vm_name'])
         self.pg1_Input_VMDesc.setText(self.loadData()['desc'])
         self.pg1_Input_RamSize.setText(self.loadData()['max_mem'])
@@ -136,13 +149,95 @@ class EditVM(QWidget):
         self.pg1_btn_ISOLoc.adjustSize()
         self.pg1_Input_CPUSize.setText(self.loadData()['max_core'])
 
+        # btn
+        self.btn_GeneralPage.clicked.connect(self.page1)
+        self.btn_DiskPage.clicked.connect(self.page2)
+        self.btn_EtcPage.clicked.connect(self.page3)
+
+    def reloadDiskList(self):
+        try:
+            self.model.clear()
+            self.diskList = self.loadData()['disk']['disk_list']
+            #print("full disklist configuration:\n" + str(self.diskList))
+
+            for i in self.diskList:
+                print(f"load disk: {i}")
+                self.getDisk = self.loadData()['disk']['disk_list'][i]
+                print(self.getDisk)
+                if(self.getDisk['is_primary']):
+                    it = QStandardItem('Pri: ' + self.getDisk['disk_name'])
+                else:
+                    it = QStandardItem(self.getDisk['disk_name'])
+                self.model.appendRow(it)
+                it.setData(QIcon(f'src/png/disk/type_{self.getDisk['disk_type']}.png'.format(i)), QtCore.Qt.ItemDataRole.DecorationRole)
+                self.pg2_diskListView.setModel(self.model)
+        except(FileNotFoundError, SystemError, json.decoder.JSONDecodeError, PermissionError) as e:
+            print('failed to read metadata, is file even?')    
+            failReadData = QMessageBox(self)
+            failReadData.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_TITLE))
+            failReadData.setIcon(QMessageBox.Icon.Critical)
+            failReadData.setWindowIcon(QIcon('src/png/icons/remove128.png'))
+            if e == json.decoder.JSONDecodeError:
+                failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_JSON))
+            elif e == SystemError:
+                failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_SYSTEM))
+            elif e == PermissionError:
+                failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_PERMISSION))
+            else:
+                failReadData.setText(Language.getLanguageByEnum(LanguageList.MSG_MAIN_METADATA_FAILED_NOFILEFOUND))
+            failReadData.setDetailedText(f'{traceback.format_exc()}')
+            failReadData.exec()         
+            return
+
     def loadData(self):
         try:
             f = open('./src/vm/' + self.vmname + '/metadata.json', 'r+')
             return json.load(f)
         except (json.JSONDecodeError, PermissionError, SystemError):
-            jsonDecodingError = QMessageBox.critical(self, Language.getLanguageByEnum(LanguageList.MSG_VAR_TITLE), Language.getLanguageByEnum(LanguageList.MSG_VAR_DESC))
-    
+            jsonDecodeError = Notifiaction.showError(LanguageList.MSG_VAR_TITLE, LanguageList.MSG_VAR_DESC, 2000, True, self)
+
+    def page1(self): # general
+        print("Enabling Page 1")
+        self.pg1_btn_ISOLoc.setHidden(False)
+        self.pg1_Input_CPUSize.setHidden(False)
+        self.pg1_Input_RamSize.setHidden(False)
+        self.pg1_Input_VMDesc.setHidden(False)
+        self.pg1_Input_VMName.setHidden(False)
+        self.pg1_label_ISOLoc.setHidden(False)
+        self.pg1_label_RamSize.setHidden(False)
+        self.pg1_label_VMDesc.setHidden(False)
+        self.pg1_label_VMName.setHidden(False)
+        self.pg1_lable_CPUSize.setHidden(False)
+        self.pg2_diskListView.setHidden(True)
+
+    def page2(self): # disk
+        print("Enabling Page 2")
+        self.pg1_btn_ISOLoc.setHidden(True)
+        self.pg1_Input_CPUSize.setHidden(True)
+        self.pg1_Input_RamSize.setHidden(True)
+        self.pg1_Input_VMDesc.setHidden(True)
+        self.pg1_Input_VMName.setHidden(True)
+        self.pg1_label_ISOLoc.setHidden(True)
+        self.pg1_label_RamSize.setHidden(True)
+        self.pg1_label_VMDesc.setHidden(True)
+        self.pg1_label_VMName.setHidden(True)
+        self.pg1_lable_CPUSize.setHidden(True)
+        self.pg2_diskListView.setHidden(False)
+
+    def page3(self): #etc
+        print("Enabling Page 3")
+        self.pg1_btn_ISOLoc.setHidden(True)
+        self.pg1_Input_CPUSize.setHidden(True)
+        self.pg1_Input_RamSize.setHidden(True)
+        self.pg1_Input_VMDesc.setHidden(True)
+        self.pg1_Input_VMName.setHidden(True)
+        self.pg1_label_ISOLoc.setHidden(True)
+        self.pg1_label_RamSize.setHidden(True)
+        self.pg1_label_VMDesc.setHidden(True)
+        self.pg1_label_VMName.setHidden(True)
+        self.pg1_lable_CPUSize.setHidden(True)
+        self.pg2_diskListView.setHidden(True)
+
     def setupKR(self):
         if(os.environ.get('Language') == 'ko_KR'):
             print('KR Lang Detected, Moving.')
