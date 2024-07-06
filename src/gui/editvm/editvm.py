@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QLineEdit, QListView
+from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QLineEdit, QListView, QAbstractItemView
 from PyQt6.QtGui import QIcon, QPixmap, QStandardItemModel, QStandardItem
 from PyQt6 import QtCore
 from src.gui.label import whynotclick
@@ -79,6 +79,7 @@ class EditVM(QWidget):
         self.model = QStandardItemModel()
         self.reloadDiskList()
         self.pg2_diskListView.setStyleSheet("border : 2px solid black;")
+        self.pg2_diskInfo = QLabel(Language.getLanguageByEnum(LanguageList.DUMMY), self)
 
         self.font_bold_title = self.label_Title.font()
         self.font_bold_title.setBold(True)
@@ -137,6 +138,9 @@ class EditVM(QWidget):
         self.pg2_diskListView.setStyleSheet("Color : white; background-color: None;")
         self.pg2_diskListView.move(20, 90)
         self.pg2_diskListView.resize(165, 340)
+        self.pg2_diskInfo.setFont(self.font_normal)
+        self.pg2_diskInfo.move(195, 100)
+        self.pg2_diskInfo.setStyleSheet("Color : white; background-color: None;")
 
         self.back.resize(600, 340)
 
@@ -153,6 +157,10 @@ class EditVM(QWidget):
         self.btn_GeneralPage.clicked.connect(self.page1)
         self.btn_DiskPage.clicked.connect(self.page2)
         self.btn_EtcPage.clicked.connect(self.page3)
+        self.pg2_diskListView.installEventFilter(self)
+
+        self.pg2_diskListView.clicked[QtCore.QModelIndex].connect(self.on_clicked)
+        self.pg2_diskListView.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
 
     def reloadDiskList(self):
         try:
@@ -164,10 +172,7 @@ class EditVM(QWidget):
                 print(f"load disk: {i}")
                 self.getDisk = self.loadData()['disk']['disk_list'][i]
                 print(self.getDisk)
-                if(self.getDisk['is_primary']):
-                    it = QStandardItem('Pri: ' + self.getDisk['disk_name'])
-                else:
-                    it = QStandardItem(self.getDisk['disk_name'])
+                it = QStandardItem(self.getDisk['disk_name'])
                 self.model.appendRow(it)
                 it.setData(QIcon(f'src/png/disk/type_{self.getDisk['disk_type']}.png'.format(i)), QtCore.Qt.ItemDataRole.DecorationRole)
                 self.pg2_diskListView.setModel(self.model)
@@ -189,6 +194,17 @@ class EditVM(QWidget):
             failReadData.exec()         
             return
 
+    def on_clicked(self, index):
+        print("retriving disk info")
+        try:
+            item = self.model.itemFromIndex(index)
+            diskInfo = self.loadData()['disk']['disk_list'][item.text()]
+            print(diskInfo)
+            self.pg2_diskInfo.setText(f"Disk Name: {diskInfo['disk_name']}\nDisk Type: {diskInfo['disk_type']}\nDisk Size: {diskInfo['disk_size']}\nIs Primary: {diskInfo['is_primary']}")
+            self.pg2_diskInfo.adjustSize()
+        except:
+            cannotGetDiskInformation = Notifiaction.showError(LanguageList.MSG_VAR_TITLE, LanguageList.MSG_METADATA_UNKNOWN, 2000, True, self)
+
     def loadData(self):
         try:
             f = open('./src/vm/' + self.vmname + '/metadata.json', 'r+')
@@ -209,6 +225,7 @@ class EditVM(QWidget):
         self.pg1_label_VMName.setHidden(False)
         self.pg1_lable_CPUSize.setHidden(False)
         self.pg2_diskListView.setHidden(True)
+        self.pg2_diskInfo.setHidden(True)
 
     def page2(self): # disk
         print("Enabling Page 2")
@@ -223,6 +240,7 @@ class EditVM(QWidget):
         self.pg1_label_VMName.setHidden(True)
         self.pg1_lable_CPUSize.setHidden(True)
         self.pg2_diskListView.setHidden(False)
+        self.pg2_diskInfo.setHidden(False)
 
     def page3(self): #etc
         print("Enabling Page 3")
@@ -237,6 +255,7 @@ class EditVM(QWidget):
         self.pg1_label_VMName.setHidden(True)
         self.pg1_lable_CPUSize.setHidden(True)
         self.pg2_diskListView.setHidden(True)
+        self.pg2_diskInfo.setHidden(True)
 
     def setupKR(self):
         if(os.environ.get('Language') == 'ko_KR'):

@@ -49,10 +49,3 @@ class Host:
         except:
             raise Exceptions.InvaildCodeInjection
     
-    def accessMainModule():
-        try:
-            from main import Main
-            return Main
-        except:
-            raise Exceptions.InvaildCodeInjection
-    
