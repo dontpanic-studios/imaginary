@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QLineEdit, QListView, QAbstractItemView
+from PyQt6.QtWidgets import QWidget, QLabel, QMessageBox, QLineEdit, QListView, QAbstractItemView, QCheckBox
 from PyQt6.QtGui import QIcon, QPixmap, QStandardItemModel, QStandardItem
 from PyQt6 import QtCore
 from src.gui.label import whynotclick
@@ -79,7 +79,16 @@ class EditVM(QWidget):
         self.model = QStandardItemModel()
         self.reloadDiskList()
         self.pg2_diskListView.setStyleSheet("border : 2px solid black;")
-        self.pg2_diskInfo = QLabel(Language.getLanguageByEnum(LanguageList.DUMMY), self)
+        self.pg2_diskInfo = QLabel(Language.getLanguageByEnum(LanguageList.EDITVM_DISK_NOT_SELECTED), self)
+        self.pg2_diskCreateTip = QLabel(Language.getLanguageByEnum(LanguageList.EDITVM_DISK_CREATION_TIP), self)
+
+        # etc page
+        self.pg3_legacyModeCheckBox = QCheckBox(self)
+        self.pg3_legacyModeCheckBox.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_LEGACY_BOOT))
+        self.pg3_tcgAccelator = QCheckBox(self)
+        self.pg3_tcgAccelator.setText(Language.getLanguageByEnum(LanguageList.CREATEVM_TCG_ACCEL))
+        self.pg3_argumentAdder = QLineEdit(self)
+        self.pg3_argumentAdder.setPlaceholderText(Language.getLanguageByEnum(LanguageList.CREATEVM_ARGUMENT_PLACEHOLDER))
 
         self.font_bold_title = self.label_Title.font()
         self.font_bold_title.setBold(True)
@@ -141,8 +150,44 @@ class EditVM(QWidget):
         self.pg2_diskInfo.setFont(self.font_normal)
         self.pg2_diskInfo.move(195, 100)
         self.pg2_diskInfo.setStyleSheet("Color : white; background-color: None;")
+        self.pg2_diskCreateTip.setFont(self.font_normal)
+        self.pg2_diskCreateTip.setStyleSheet("Color : #212121; background-color: None;")
+        self.pg2_diskCreateTip.move(195, 395)
+        self.pg3_legacyModeCheckBox.move(35, 100)
+        self.pg3_legacyModeCheckBox.setFont(self.font_normal)
+        self.pg3_legacyModeCheckBox.setStyleSheet("Color : white; background-color: None;")
+        self.pg3_tcgAccelator.move(35, 130)
+        self.pg3_tcgAccelator.setFont(self.font_normal)
+        self.pg3_tcgAccelator.setStyleSheet("Color : white; background-color: None;")
 
         self.back.resize(600, 340)
+
+    def saveData(self):
+        try:
+            if (os.getenv('unlimited') == 'False'):
+                with open(f'./src/vm/{self.vmname}/metadata.json', 'w+') as jsonfile:
+                    data = json.load(jsonfile)
+
+                # pg1 - basic data
+                data['vm_name'] = self.pg1_Input_VMName.text()
+                data['desc'] = self.pg1_Input_VMDesc.text()
+                data['max_core'] = self.pg1_Input_CPUSize.text()
+                data['max_mem'] = self.pg1_Input_RamSize.text()
+                data['iso_loc'] = self.pg1_btn_ISOLoc.text()
+
+                # pg2 - disk data
+                # none
+
+                # pg3 - etc
+                data['isaccel']['bool'] = self.pg3_tcgAccelator.isEnabled()
+                data['isLegacyMode'] = self.pg3_legacyModeCheckBox.isEnabled()
+            else:
+                Notifiaction.showWarn(LanguageList.MSG_EDITVM_UNLIMITED_SETTING_ENABLED_TITLE, LanguageList.MSG_EDITVM_UNLIMITED_SETTING_ENABLED_DESC, 1500, True, self)
+            
+            with open(f'src/vm/{self.vmname}/metadata.json') as jsonFile2:
+                    data = json.dump(data, jsonFile2)
+        except (json.JSONDecodeError, PermissionError, SystemError):
+            jsonDecodeError = Notifiaction.showError(LanguageList.MSG_VAR_TITLE, LanguageList.MSG_VAR_DESC, 2000, True, self)
 
     def setData(self):
         # page 1 - general
@@ -158,6 +203,10 @@ class EditVM(QWidget):
         self.btn_DiskPage.clicked.connect(self.page2)
         self.btn_EtcPage.clicked.connect(self.page3)
         self.pg2_diskListView.installEventFilter(self)
+
+        # checkbox
+        self.pg3_tcgAccelator.setEnabled(self.loadData()['isaccel']['bool'])
+        self.pg3_legacyModeCheckBox.setEnabled(self.loadData()['isLegacyMode'])
 
         self.pg2_diskListView.clicked[QtCore.QModelIndex].connect(self.on_clicked)
         self.pg2_diskListView.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -226,6 +275,9 @@ class EditVM(QWidget):
         self.pg1_lable_CPUSize.setHidden(False)
         self.pg2_diskListView.setHidden(True)
         self.pg2_diskInfo.setHidden(True)
+        self.pg2_diskCreateTip.setHidden(True)
+        self.pg3_tcgAccelator.setHidden(True)
+        self.pg3_legacyModeCheckBox.setHidden(True)
 
     def page2(self): # disk
         print("Enabling Page 2")
@@ -241,6 +293,9 @@ class EditVM(QWidget):
         self.pg1_lable_CPUSize.setHidden(True)
         self.pg2_diskListView.setHidden(False)
         self.pg2_diskInfo.setHidden(False)
+        self.pg2_diskCreateTip.setHidden(False)
+        self.pg3_tcgAccelator.setHidden(True)
+        self.pg3_legacyModeCheckBox.setHidden(True)
 
     def page3(self): #etc
         print("Enabling Page 3")
@@ -256,6 +311,9 @@ class EditVM(QWidget):
         self.pg1_lable_CPUSize.setHidden(True)
         self.pg2_diskListView.setHidden(True)
         self.pg2_diskInfo.setHidden(True)
+        self.pg2_diskCreateTip.setHidden(True)
+        self.pg3_tcgAccelator.setHidden(False)
+        self.pg3_legacyModeCheckBox.setHidden(False)
 
     def setupKR(self):
         if(os.environ.get('Language') == 'ko_KR'):

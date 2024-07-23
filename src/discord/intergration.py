@@ -2,10 +2,10 @@ from pypresence import Presence
 from main import Main
 from PyQt6.QtWidgets import QApplication
 import sys
-from tkinter import messagebox
+from src.language.lang import LanguageList
 from pypresence import DiscordNotFound
 from dotenv import load_dotenv
-import qdarktheme
+from src.notification.wrapper import Notifiaction
 load_dotenv('./data/setting.env')
 
 print('load discord')
@@ -25,7 +25,7 @@ try:
     while True:
         RPC.update(details=curState, large_image='star')
 except DiscordNotFound:
-    messagebox.showwarning(title='Discord를 찾을수 없음', message='디스코드를 찾을수 없어 관련된 기능이 꺼진채로 실행이 됩니다.\n관련된 기능이 비활성화 될수도 있음을 확인합니다.')
+    Notifiaction.showWarn(LanguageList.MSG_DISCORD_NOT_FOUND_TITLE, LanguageList.MSG_DISCORD_NOT_FOUND_DESC, 1500, True)
     app = QApplication(sys.argv[0:]) # yeah i shouldn't doing this for presence but, no option!
     win = Main()
     win.setupWidget()

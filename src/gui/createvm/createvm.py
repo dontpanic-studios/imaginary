@@ -22,7 +22,7 @@ class CreateVM(QWidget):
             self.width = 640
             self.height = 480
 
-            self.setWindowTitle("VM Setup Wizard")
+            self.setWindowTitle(Language.getLanguageByEnum(LanguageList.CREATE_VM))
             self.setStyleSheet("background-color: #262626; Color : white;") 
             self.setWindowIcon(QIcon('src/png/icons/128.png'))
             self.setFixedSize(self.width, self.height)
@@ -231,11 +231,8 @@ class CreateVM(QWidget):
         self.Input_RamSize.setPlaceholderText('eg) 4G')
         self.Input_VGAMemSize.setPlaceholderText('1 ~ 256')
         self.Input_SysCoreSize.setPlaceholderText('eg) 2')
-        self.experimental_Input_StartupArg.setPlaceholderText('Startup Arguments')
+        self.experimental_Input_StartupArg.setPlaceholderText(Language.getLanguageByEnum(LanguageList.CREATEVM_ARGUMENT_PLACEHOLDER))
         self.label_loadISO.clicked.connect(self.loadISO)
-
-        self.Input_VMName.setToolTip('Virtual Machine Name cannot contain ., /, \, ), (')
-        self.Input_VGAMemSize.setToolTip('Virtual GPU Memory must include when using other than "virtio-gpu", "virtio-gpu-gl".')
 
         self.experimental_GPUType.addItems(self.experimental_GPUType_List)
         self.experimental_VMType.addItems(self.experimental_VMType_List)
