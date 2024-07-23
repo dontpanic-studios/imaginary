@@ -40,6 +40,7 @@
     "CREATEVM_LABEL_CPU": "Virtual CPU Core",
     "CREATEVM_LABEL_GPU_VRAM": "VGPU Memory (Mb)",
     "CREATEVM_LABEL_GPU_LIST": "Select VGPU",
+    "CREATEVM_ARGUMENT_PLACEHOLDER": "Guest Startup Option",
     "CREATEVM_LABEL_DISK_SIZE": "Disk Size",
     "CREATEVM_LEGACY_BOOT": "Use Legacy Boot Mode (Non-UEFI)",
     "CREATEVM_NEXT": "Next",
@@ -47,6 +48,8 @@
     "CREATEVM_BACK": "Back",
 
     "EDITVM_TITLE": "Edit VM",
+    "EDITVM_DISK_NOT_SELECTED": "Disk not selected.",
+    "EDITVM_DISK_CREATION_TIP": "Use Disk Tool on the main screen to create disk",
 
     "DISKTOOL_TITLE": "Disk Tool",
     "DISKTOOL_LABEL_DISKSIZE": "Disk Size",
@@ -81,6 +84,9 @@
     "MSG_CREATEVM_ILLIGAL_CORE": "'Max Core' must be numeric Type",
     "MSG_CREATEVM_SLOWGPU_TITLE": "Using Slow V-GPU",
     "MSG_CREATEVM_SLOWGPU_DESC": "You have selected legacy V-GPU type than virtio-gpu.\nPerformance may slow down.",
+
+    "MSG_EDITVM_UNLIMITED_SETTING_ENABLED_TITLE": "Unlimited Setting Enabled",
+    "MSG_EDITVM_UNLIMITED_SETTING_ENABLED_DESC": "Unlimited settings are turned on. If you save the settings after turning them on, an unknown error may occur.",
 
     "MSG_MAIN_METADATA_FAILED_TITLE": "Read Failed",
     "MSG_MAIN_METADATA_FAILED_JSON": "Cannot Read VM Metadata file.\n\nJSON Decoding Error, Imaginary cannot read this JSON Format.",
@@ -140,5 +146,8 @@
     "MSG_DISKTOOL_CREATE_FAILURE_DESC": "Imaginary Failed to create new disk,\nPlease check that every option is at vaild format.\n\nCheck Show Details.. for more information.",
 
     "MSG_IUPL_INITALLIZE_FAIL_TITLE": "IUPL Initallizing failed",
-    "MSG_IUPL_INITALLIZE_FAIL_DESC": "Plugin code injection failed, please contact plugin developer."
+    "MSG_IUPL_INITALLIZE_FAIL_DESC": "Plugin code injection failed, please contact plugin developer.",
+
+    "MSG_DISCORD_NOT_FOUND_TITLE": "Cannot find Discord Desktop App",
+    "MSG_DISCORD_NOT_FOUND_DESC": "Imaginary could not find discord app process, releated function may disabled."
 }

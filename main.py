@@ -19,6 +19,8 @@ from fontTools.ttLib import TTFont
 from src.notification.wrapper import Notifiaction
 from pyqttoast import Toast, ToastPreset
 
+print('cleaning pycache')
+subprocess.call('pyclean ./')
 
 print('Installing Figtree Font.')
 try:
@@ -342,11 +344,12 @@ class Main(QWidget):
         f = open('./src/vm/' + self.label_Vm_Title.text() + '/metadata.json', 'r+')
         data = json.load(f)
         try:
+            baseURL = f"src/qemu/qemu-system{data['emulate']} -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} {data['addition']['args']}"
             if(data['isaccel']['bool'] == False):
                 if(data['vga']['type'] == 'isa-vga'):
-                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-{data['emulate']} -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']},vgamem_mb={data['vga']['mem']} {data['addition']['args']}"], stdout=subprocess.PIPE) #DEBUG
+                    qemu = subprocess.Popen(["powershell", baseURL + f" -device {data['vga']['type']},vgamem_mb={data['vga']['mem']}"], stdout=subprocess.PIPE) #DEBUG
                 else:
-                    qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-{data['emulate']} -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} {data['addition']['args']}"], stdout=subprocess.PIPE) #DEBUG
+                    qemu = subprocess.Popen(["powershell", baseURL + f" -device {data['vga']['type']}"], stdout=subprocess.PIPE) #DEBUG
             else:
                 qemu = subprocess.Popen(["powershell", f"src/qemu/qemu-system-{data['emulate']} -display gtk,show-menubar=off -drive format={data['disk']['disk_type']},file={data['disk']['disk_loc']} -cdrom {data['iso_loc']} -name '{data['vm_name']}' -smp {data['max_core']} -m {data['max_mem']} -device {data['vga']['type']} -accel {data['isaccel']['acceltype']},thread=multi {data['addition']['args']}"], stdout=subprocess.PIPE) #DEBUG
             proc = psutil.Process(qemu.pid) #DEBUG
@@ -490,3 +493,7 @@ class Main(QWidget):
 
 if __name__ == '__main__':
     Presence.connect()
+
+# imaginary python version ends here.
+# bye, and let's meet at rust ver :)
+# - dev:: standards
