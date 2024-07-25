@@ -7,11 +7,11 @@
 
 <p align="center">Your friendly QEMU GUI Wrapper</p>  
 <p align="center">
-	<a href="https://github.com/dontpanic-studios/imaginary-legacy/releases/latest"><img src="https://img.shields.io/github/v/release/dontpanic-studios/imaginary-legacy?label=latest&style=for-the-badge&"></a>
-	<a href="https://github.com/dontpanic-studios/imaginary-legacy/releases"><img src="https://img.shields.io/github/downloads/dontpanic-studios/imaginary-legacy/latest/imaginary-setup.exe?style=for-the-badge&"></a>
-	<a href="https://github.com/dontpanic-studios/imaginary-legacy/graphs/contributors"><img src="https://img.shields.io/github/contributors/dontpanic-studios/imaginary-legacy?style=for-the-badge&"></a>
-	<a href="https://github.com/dontpanic-studios/imaginary-legacy/blob/main/github-resource/README_KR.md">[KR]</a>
-	<a href="https://github.com/dontpanic-studios/imaginary-legacy/blob/main/README.md">[EN]</a>
+	<a href="https://github.com/dontpanic-studios/imaginary/releases/latest"><img src="https://img.shields.io/github/v/release/dontpanic-studios/imaginary?label=latest&style=for-the-badge&"></a>
+	<a href="https://github.com/dontpanic-studios/imaginary/releases"><img src="https://img.shields.io/github/downloads/dontpanic-studios/imaginary/latest/imaginary-setup.exe?style=for-the-badge&"></a>
+	<a href="https://github.com/dontpanic-studios/imaginary/graphs/contributors"><img src="https://img.shields.io/github/contributors/dontpanic-studios/imaginary?style=for-the-badge&"></a>
+	<a href="https://github.com/dontpanic-studios/imaginary/blob/main/github-resource/README_KR.md">[KR]</a>
+	<a href="https://github.com/dontpanic-studios/imaginary/blob/main/README.md">[EN]</a>
 </p>  
 
 ## 👀 Features
@@ -28,7 +28,7 @@
 
 ## 📜 Information about using this project
 - Imaginary Project is licensed under GPL-3.0 License, check [LICENSE](https://github.com/dontpanic-studios/imaginary-legacy/blob/main/LICENSE) for full information
-- Imaginary has Code of Conduct page! For more information please check [This](https://github.com/dontpanic-studios/imaginary-legacy?tab=coc-ov-file) tab.
+- Imaginary has Code of Conduct page! For more information please check [This](https://github.com/dontpanic-studios/imaginaryimaginary ?tab=coc-ov-file) tab.
 
 > *GUI Preview of Imaginary*
   
