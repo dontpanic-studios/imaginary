@@ -1,6 +1,3 @@
-# Legacy Edition!
-- This version is currently non-maintained and moved to another version, it won't be updated.
-
 <p align="center">
 	<img src="https://github.com/dontpanic-studios/imaginary-legacy/blob/main/github-resource/logo.png?raw=true">
 </p>
