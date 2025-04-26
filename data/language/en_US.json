@@ -84,6 +84,8 @@
     "MSG_CREATEVM_ILLIGAL_CORE": "'Max Core' must be numeric Type",
     "MSG_CREATEVM_SLOWGPU_TITLE": "Using Slow V-GPU",
     "MSG_CREATEVM_SLOWGPU_DESC": "You have selected legacy V-GPU type than virtio-gpu.\nPerformance may slow down.",
+    "MSG_CREATEVM_FAILED_CREATING_TITLE": "Failed creating Virtual Machine",
+    "MSG_CREATEVM_FAILED_CREATING_DESC": "Unknown error has been occurred, Click 'Show More..' to see log information.",
 
     "MSG_EDITVM_UNLIMITED_SETTING_ENABLED_TITLE": "Unlimited Setting Enabled",
     "MSG_EDITVM_UNLIMITED_SETTING_ENABLED_DESC": "Unlimited settings are turned on. If you save the settings after turning them on, an unknown error may occur.",

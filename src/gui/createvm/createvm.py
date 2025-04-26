@@ -352,8 +352,8 @@ class CreateVM(QWidget):
                         findUpdateMsg = QMessageBox(self)
                         findUpdateMsg.setIcon(QMessageBox.Icon.Critical)
                         findUpdateMsg.setWindowIcon(QIcon('src/png/icons/128.png'))
-                        findUpdateMsg.setWindowTitle('우리는평화를원한다')
-                        findUpdateMsg.setText(f'Imaginary가 가상머신을 생성중에 오류가 발생했다고 판단했습니다.\nShow Details... 를 눌러 자세한 정보를 확인가능합니다.')
+                        findUpdateMsg.setWindowTitle(Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_FAILED_CREATING_TITLE))
+                        findUpdateMsg.setText(Language.getLanguageByEnum(LanguageList.MSG_CREATEVM_FAILED_CREATING_DESC))
                         findUpdateMsg.setDetailedText(f'{traceback.format_exc()}')
                         findUpdateMsg.exec()   
                 except FileExistsError:

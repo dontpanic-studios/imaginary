@@ -131,6 +131,9 @@ class LanguageList(Enum): # oh no
     EDITVM_DISK_CREATION_TIP = auto()
     MSG_DISCORD_NOT_FOUND_TITLE = auto()
     MSG_DISCORD_NOT_FOUND_DESC = auto()
+    MSG_CREATEVM_FAILED_CREATING_TITLE = auto()
+    MSG_CREATEVM_FAILED_CREATING_DESC = auto()
+    VMCONTROL_TITLE = auto()
 
 class Language():
     def __init__(): # type: ignore

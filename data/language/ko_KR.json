@@ -80,6 +80,8 @@
     "MSG_CREATEVM_ILLIGAL_VGPU_MEM": "GPU Memory (Mb) (은)는 무조건 숫자형식이여야 합니다.",
     "MSG_CREATEVM_ILLIGAL_CORE": "Max Core (은)는 무조건 숫자형식이여야 합니다.",
     "MSG_CREATEVM_ILLIGAL_VGPUMEM_NOT_SUPPORTED": "선택한 그래픽 세팅은 메모리 변경이 불가능한 세팅입니다,\n'qxl' 또는 'isa-vga' 로 바꿔주십시오.",
+    "MSG_CREATEVM_FAILED_CREATING_TITLE": "가상머신 생성 실패",
+    "MSG_CREATEVM_FAILED_CREATING_DESC": "Imaginary가 가상머신을 생성하는대에 실패하였습니다, 'Show More..' 를 눌러서 추가정보를 확인할수 있습니다.",
 
     "MSG_EDITVM_UNLIMITED_SETTING_ENABLED_TITLE": "무제한 세팅 켜짐",
     "MSG_EDITVM_UNLIMITED_SETTING_ENABLED_DESC": "무제한 세팅이 켜졌습니다, 해당 세팅을 킨후 저장하게 되면 알수 없는 오류가 발생할수 있습니다.",
